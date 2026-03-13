@@ -15,7 +15,7 @@ import { UserFindOptions } from 'src/repositories/user.repository';
 import { UserTable } from 'src/schema/tables/user.table';
 import { BaseService } from 'src/services/base.service';
 import { JobOf, UserMetadataItem } from 'src/types';
-import { ImmichFileResponse } from 'src/utils/file';
+import { ImmichMediaResponse } from 'src/utils/file';
 import { mimeTypes } from 'src/utils/mime-types';
 import { getPreferences, getPreferencesPartial, mergePreferences } from 'src/utils/preferences';
 import { generateProfileImage } from 'src/utils/profile-image';
@@ -133,17 +133,13 @@ export class UserService extends BaseService {
     await this.jobRepository.queue({ name: JobName.FileDelete, data: { files: [user.profileImagePath] } });
   }
 
-  async getProfileImage(id: string): Promise<ImmichFileResponse> {
+  async getProfileImage(id: string): Promise<ImmichMediaResponse> {
     const user = await this.findOrFail(id, {});
     if (!user.profileImagePath) {
       throw new NotFoundException('User does not have a profile image');
     }
 
-    return new ImmichFileResponse({
-      path: user.profileImagePath,
-      contentType: mimeTypes.lookup(user.profileImagePath),
-      cacheControl: CacheControl.None,
-    });
+    return this.serveFromBackend(user.profileImagePath, mimeTypes.lookup(user.profileImagePath), CacheControl.None);
   }
 
   async getLicense(auth: AuthDto): Promise<LicenseResponseDto> {

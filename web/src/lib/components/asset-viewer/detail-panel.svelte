@@ -24,7 +24,7 @@
     type AlbumResponseDto,
     type AssetResponseDto,
   } from '@immich/sdk';
-  import { Icon, IconButton, LoadingSpinner, Text } from '@immich/ui';
+  import { Icon, IconButton, modalManager, Text } from '@immich/ui';
   import {
     mdiCamera,
     mdiCameraIris,
@@ -45,6 +45,7 @@
   import OnEvents from '../OnEvents.svelte';
   import UserAvatar from '../shared-components/user-avatar.svelte';
   import AlbumListItemDetails from './album-list-item-details.svelte';
+  import LoadingSpinner from '$lib/components/shared-components/LoadingSpinner.svelte';
 
   interface Props {
     asset: AssetResponseDto;

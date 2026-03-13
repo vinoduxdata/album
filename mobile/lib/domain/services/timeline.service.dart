@@ -35,6 +35,7 @@ enum TimelineOrigin {
   deepLink,
   albumActivities,
   folder,
+  remoteSpace,
 }
 
 class TimelineFactory {

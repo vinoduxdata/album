@@ -70,9 +70,6 @@ class AssetBulkUpdateDto {
 
   /// Latitude coordinate
   ///
-  /// Minimum value: -90
-  /// Maximum value: 90
-  ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
   /// source code must fall back to having a nullable type.
@@ -81,9 +78,6 @@ class AssetBulkUpdateDto {
   num? latitude;
 
   /// Longitude coordinate
-  ///
-  /// Minimum value: -180
-  /// Maximum value: 180
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -96,7 +90,7 @@ class AssetBulkUpdateDto {
   ///
   /// Minimum value: -1
   /// Maximum value: 5
-  int? rating;
+  num? rating;
 
   /// Time zone (IANA timezone)
   ///
@@ -107,6 +101,7 @@ class AssetBulkUpdateDto {
   ///
   String? timeZone;
 
+  /// Asset visibility
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -213,16 +208,24 @@ class AssetBulkUpdateDto {
 
       return AssetBulkUpdateDto(
         dateTimeOriginal: mapValueOfType<String>(json, r'dateTimeOriginal'),
-        dateTimeRelative: num.parse('${json[r'dateTimeRelative']}'),
+        dateTimeRelative: json[r'dateTimeRelative'] == null
+            ? null
+            : num.parse('${json[r'dateTimeRelative']}'),
         description: mapValueOfType<String>(json, r'description'),
         duplicateId: mapValueOfType<String>(json, r'duplicateId'),
         ids: json[r'ids'] is Iterable
             ? (json[r'ids'] as Iterable).cast<String>().toList(growable: false)
             : const [],
         isFavorite: mapValueOfType<bool>(json, r'isFavorite'),
-        latitude: num.parse('${json[r'latitude']}'),
-        longitude: num.parse('${json[r'longitude']}'),
-        rating: mapValueOfType<int>(json, r'rating'),
+        latitude: json[r'latitude'] == null
+            ? null
+            : num.parse('${json[r'latitude']}'),
+        longitude: json[r'longitude'] == null
+            ? null
+            : num.parse('${json[r'longitude']}'),
+        rating: json[r'rating'] == null
+            ? null
+            : num.parse('${json[r'rating']}'),
         timeZone: mapValueOfType<String>(json, r'timeZone'),
         visibility: AssetVisibility.fromJson(json[r'visibility']),
       );
