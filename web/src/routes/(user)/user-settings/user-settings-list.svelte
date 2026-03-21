@@ -12,6 +12,7 @@
   import { type ApiKeyResponseDto, type SessionResponseDto } from '@immich/sdk';
   import {
     mdiAccountGroupOutline,
+    mdiAccountMultipleOutline,
     mdiAccountOutline,
     mdiApi,
     mdiBellOutline,
@@ -139,6 +140,15 @@
     subtitle={$t('manage_sharing_with_partners')}
   >
     <PartnerSettings />
+  </SettingAccordion>
+
+  <SettingAccordion
+    icon={mdiAccountMultipleOutline}
+    key="user-groups"
+    title={$t('user_groups')}
+    subtitle={$t('manage_user_groups')}
+  >
+    <GroupSettings user={$user} />
   </SettingAccordion>
 
   <SettingAccordion
