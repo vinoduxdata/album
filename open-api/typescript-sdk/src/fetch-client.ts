@@ -5944,7 +5944,7 @@ export function searchAssetStatistics({ statisticsSearchDto }: {
 /**
  * Retrieve search suggestions
  */
-export function getSearchSuggestions({ country, includeNull, lensModel, make, model, spaceId, state, $type }: {
+export function getSearchSuggestions({ country, includeNull, lensModel, make, model, spaceId, state, takenAfter, takenBefore, $type }: {
     country?: string;
     includeNull?: boolean;
     lensModel?: string;
@@ -5952,6 +5952,8 @@ export function getSearchSuggestions({ country, includeNull, lensModel, make, mo
     model?: string;
     spaceId?: string;
     state?: string;
+    takenAfter?: string;
+    takenBefore?: string;
     $type: SearchSuggestionType;
 }, opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
@@ -5965,6 +5967,8 @@ export function getSearchSuggestions({ country, includeNull, lensModel, make, mo
         model,
         spaceId,
         state,
+        takenAfter,
+        takenBefore,
         "type": $type
     }))}`, {
         ...opts
@@ -6598,13 +6602,18 @@ export function updateMember({ id, userId, sharedSpaceMemberUpdateDto }: {
 /**
  * Get people in a shared space
  */
-export function getSpacePeople({ id }: {
+export function getSpacePeople({ id, takenAfter, takenBefore }: {
     id: string;
+    takenAfter?: string;
+    takenBefore?: string;
 }, opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
         status: 200;
         data: SharedSpacePersonResponseDto[];
-    }>(`/shared-spaces/${encodeURIComponent(id)}/people`, {
+    }>(`/shared-spaces/${encodeURIComponent(id)}/people${QS.query(QS.explode({
+        takenAfter,
+        takenBefore
+    }))}`, {
         ...opts
     }));
 }
