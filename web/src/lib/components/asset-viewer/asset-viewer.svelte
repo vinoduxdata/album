@@ -43,6 +43,7 @@
   import ActivityViewer from './activity-viewer.svelte';
   import DetailPanel from './detail-panel.svelte';
   import EditorPanel from './editor/editor-panel.svelte';
+  import TrimArea from './editor/trim-tool/trim-area.svelte';
   import CropArea from './editor/transform-tool/crop-area.svelte';
   import ImagePanoramaViewer from './image-panorama-viewer.svelte';
   import OcrButton from './ocr-button.svelte';
@@ -100,7 +101,6 @@
 
   let previewStackedAsset: AssetResponseDto | undefined = $state();
   let stack: StackResponseDto | null = $state(null);
-
   const asset = $derived(previewStackedAsset ?? cursor.current);
   const nextAsset = $derived(cursor.nextAsset);
   const previousAsset = $derived(cursor.previousAsset);
@@ -391,6 +391,9 @@
     if (previewStackedAsset) {
       return previewStackedAsset.type === AssetTypeEnum.Image ? 'PhotoViewer' : 'StackVideoViewer';
     }
+    if (assetViewerManager.isShowEditor && editManager.selectedTool?.type === EditToolType.Trim) {
+      return 'TrimArea';
+    }
     if (asset.type === AssetTypeEnum.Video) {
       return 'VideoViewer';
     }
@@ -530,6 +533,8 @@
       />
     {:else if viewerKind === 'ImagePanaramaViewer'}
       <ImagePanoramaViewer {asset} />
+    {:else if viewerKind === 'TrimArea'}
+      <TrimArea {asset} />
     {:else if viewerKind === 'CropArea'}
       <CropArea {asset} />
     {:else if viewerKind === 'PhotoViewer'}

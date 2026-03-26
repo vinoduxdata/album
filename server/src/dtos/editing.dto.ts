@@ -1,10 +1,19 @@
-import { createZodDto } from 'nestjs-zod';
-import z from 'zod';
+import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { ArrayMinSize, IsEnum, IsInt, IsNumber, Min, ValidateNested } from 'class-validator';
+import {
+  IsAxisAlignedRotation,
+  IsGreaterThanProperty,
+  IsUniqueEditActions,
+  ValidateEnum,
+  ValidateUUID,
+} from 'src/validation';
 
 export enum AssetEditAction {
   Crop = 'crop',
   Rotate = 'rotate',
   Mirror = 'mirror',
+  Trim = 'trim',
 }
 
 export const AssetEditActionSchema = z
@@ -19,12 +28,76 @@ export enum MirrorAxis {
 
 const MirrorAxisSchema = z.enum(['horizontal', 'vertical']).describe('Axis to mirror along').meta({ id: 'MirrorAxis' });
 
-const CropParametersSchema = z
-  .object({
-    x: z.number().min(0).describe('Top-Left X coordinate of crop'),
-    y: z.number().min(0).describe('Top-Left Y coordinate of crop'),
-    width: z.number().min(1).describe('Width of the crop'),
-    height: z.number().min(1).describe('Height of the crop'),
+  @IsInt()
+  @Min(0)
+  @ApiProperty({ description: 'Top-Left Y coordinate of crop' })
+  y!: number;
+
+  @IsInt()
+  @Min(1)
+  @ApiProperty({ description: 'Width of the crop' })
+  width!: number;
+
+  @IsInt()
+  @Min(1)
+  @ApiProperty({ description: 'Height of the crop' })
+  height!: number;
+}
+
+export class RotateParameters {
+  @IsAxisAlignedRotation()
+  @ApiProperty({ description: 'Rotation angle in degrees' })
+  angle!: number;
+}
+
+export class MirrorParameters {
+  @IsEnum(MirrorAxis)
+  @ApiProperty({ enum: MirrorAxis, enumName: 'MirrorAxis', description: 'Axis to mirror along' })
+  axis!: MirrorAxis;
+}
+
+export class TrimParameters {
+  @IsNumber()
+  @Min(0)
+  @ApiProperty({ description: 'Start time in seconds' })
+  startTime!: number;
+
+  @IsNumber()
+  @Min(0)
+  @IsGreaterThanProperty('startTime')
+  @ApiProperty({ description: 'End time in seconds' })
+  endTime!: number;
+}
+
+export type AssetEditParameters = CropParameters | RotateParameters | MirrorParameters | TrimParameters;
+export type AssetEditActionItem =
+  | {
+      action: AssetEditAction.Crop;
+      parameters: CropParameters;
+    }
+  | {
+      action: AssetEditAction.Rotate;
+      parameters: RotateParameters;
+    }
+  | {
+      action: AssetEditAction.Mirror;
+      parameters: MirrorParameters;
+    }
+  | {
+      action: AssetEditAction.Trim;
+      parameters: TrimParameters;
+    };
+
+@ApiExtraModels(CropParameters, RotateParameters, MirrorParameters, TrimParameters)
+export class AssetEditActionItemDto {
+  @ValidateEnum({ name: 'AssetEditAction', enum: AssetEditAction, description: 'Type of edit action to perform' })
+  action!: AssetEditAction;
+
+  @ApiProperty({
+    description: 'List of edit actions to apply (crop, rotate, or mirror)',
+    anyOf: [CropParameters, RotateParameters, MirrorParameters, TrimParameters].map((type) => ({
+      $ref: getSchemaPath(type),
+    })),
   })
   .meta({ id: 'CropParameters' });
 
@@ -59,10 +132,11 @@ const AssetEditParametersSchema = z
   .describe('List of edit actions to apply (crop, rotate, or mirror)');
 
 const actionParameterMap = {
-  [AssetEditAction.Crop]: CropParametersSchema,
-  [AssetEditAction.Rotate]: RotateParametersSchema,
-  [AssetEditAction.Mirror]: MirrorParametersSchema,
-} as const;
+  [AssetEditAction.Crop]: CropParameters,
+  [AssetEditAction.Rotate]: RotateParameters,
+  [AssetEditAction.Mirror]: MirrorParameters,
+  [AssetEditAction.Trim]: TrimParameters,
+};
 
 function getExpectedKeysByActionMessage(): string {
   const expectedByAction = Object.entries(actionParameterMap)

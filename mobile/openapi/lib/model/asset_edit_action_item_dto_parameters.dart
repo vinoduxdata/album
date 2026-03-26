@@ -19,6 +19,8 @@ class AssetEditActionItemDtoParameters {
     required this.y,
     required this.angle,
     required this.axis,
+    required this.endTime,
+    required this.startTime,
   });
 
   /// Height of the crop
@@ -44,7 +46,18 @@ class AssetEditActionItemDtoParameters {
   /// Rotation angle in degrees
   num angle;
 
+  /// Axis to mirror along
   MirrorAxis axis;
+
+  /// End time in seconds
+  ///
+  /// Minimum value: 0
+  num endTime;
+
+  /// Start time in seconds
+  ///
+  /// Minimum value: 0
+  num startTime;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is AssetEditActionItemDtoParameters &&
@@ -53,7 +66,9 @@ class AssetEditActionItemDtoParameters {
     other.x == x &&
     other.y == y &&
     other.angle == angle &&
-    other.axis == axis;
+    other.axis == axis &&
+    other.endTime == endTime &&
+    other.startTime == startTime;
 
   @override
   int get hashCode =>
@@ -63,10 +78,12 @@ class AssetEditActionItemDtoParameters {
     (x.hashCode) +
     (y.hashCode) +
     (angle.hashCode) +
-    (axis.hashCode);
+    (axis.hashCode) +
+    (endTime.hashCode) +
+    (startTime.hashCode);
 
   @override
-  String toString() => 'AssetEditActionItemDtoParameters[height=$height, width=$width, x=$x, y=$y, angle=$angle, axis=$axis]';
+  String toString() => 'AssetEditActionItemDtoParameters[height=$height, width=$width, x=$x, y=$y, angle=$angle, axis=$axis, endTime=$endTime, startTime=$startTime]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -76,6 +93,8 @@ class AssetEditActionItemDtoParameters {
       json[r'y'] = this.y;
       json[r'angle'] = this.angle;
       json[r'axis'] = this.axis;
+      json[r'endTime'] = this.endTime;
+      json[r'startTime'] = this.startTime;
     return json;
   }
 
@@ -94,6 +113,8 @@ class AssetEditActionItemDtoParameters {
         y: num.parse('${json[r'y']}'),
         angle: num.parse('${json[r'angle']}'),
         axis: MirrorAxis.fromJson(json[r'axis'])!,
+        endTime: num.parse('${json[r'endTime']}'),
+        startTime: num.parse('${json[r'startTime']}'),
       );
     }
     return null;
@@ -147,6 +168,8 @@ class AssetEditActionItemDtoParameters {
     'y',
     'angle',
     'axis',
+    'endTime',
+    'startTime',
   };
 }
 

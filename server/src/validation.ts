@@ -251,16 +251,28 @@ export const hexColor = z
   .regex(hexColorRegex)
   .transform((val) => (val.startsWith('#') ? val : `#${val}`));
 
-/**
- * Transform empty strings to null. Inner schema passed to this function must accept null.
- * @docs https://zod.dev/api?id=preprocess
- * @example emptyStringToNull(z.string().nullable()).optional() // [encouraged] final schema is optional
- * @example emptyStringToNull(z.string().nullable()) // [encouraged] same as the one above, but final schema is not optional
- * @example emptyStringToNull(z.string().nullish()) // [discouraged] same as the one above, might be confusing
- * @example emptyStringToNull(z.string().optional()) // fails: string schema rejects null
- * @example emptyStringToNull(z.string().nullable()).nullish() // [discouraged] passes, null is duplicated. use the first example instead
- */
-export const emptyStringToNull = <T extends z.ZodTypeAny>(schema: T) =>
-  z.preprocess((val) => (val === '' ? null : val), schema);
+export const IsGreaterThanOrEqualTo = (property: string, validationOptions?: ValidationOptions) => {
+  return Validate(IsGreaterThanOrEqualToConstraint, [property], validationOptions);
+};
 
-export const sanitizeFilename = z.string().transform((val) => sanitize(val.replaceAll('.', '')));
+@ValidatorConstraint({ name: 'isGreaterThanProperty' })
+export class IsGreaterThanPropertyConstraint implements ValidatorConstraintInterface {
+  validate(value: unknown, args: ValidationArguments) {
+    const relatedPropertyName = args.constraints?.[0] as string;
+    const relatedValue = (args.object as Record<string, unknown>)[relatedPropertyName];
+    if (!Number.isFinite(value) || !Number.isFinite(relatedValue)) {
+      return true;
+    }
+
+    return Number(value) > Number(relatedValue);
+  }
+
+  defaultMessage(args: ValidationArguments) {
+    const relatedPropertyName = args.constraints?.[0] as string;
+    return `${args.property} must be greater than ${relatedPropertyName}`;
+  }
+}
+
+export const IsGreaterThanProperty = (property: string, validationOptions?: ValidationOptions) => {
+  return Validate(IsGreaterThanPropertyConstraint, [property], validationOptions);
+};
