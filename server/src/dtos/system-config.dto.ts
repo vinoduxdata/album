@@ -254,14 +254,280 @@ const SystemConfigServerSchema = z
   })
   .meta({ id: 'SystemConfigServerDto' });
 
-const SystemConfigSmtpTransportSchema = z
-  .object({
-    ignoreCert: configBool.describe('Whether to ignore SSL certificate errors'),
-    host: z.string().describe('SMTP server hostname'),
-    port: z.number().min(0).max(65_535).describe('SMTP server port'),
-    secure: configBool.describe('Whether to use secure connection (TLS/SSL)'),
-    username: z.string().describe('SMTP username'),
-    password: z.string().describe('SMTP password'),
+  @ValidateBoolean({ description: 'Accelerated decode' })
+  accelDecode!: boolean;
+
+  @ValidateEnum({ enum: ToneMapping, name: 'ToneMapping', description: 'Tone mapping' })
+  tonemap!: ToneMapping;
+}
+
+class JobSettingsDto {
+  @IsInt()
+  @IsPositive()
+  @ApiProperty({ type: 'integer', description: 'Concurrency' })
+  concurrency!: number;
+}
+
+class SystemConfigJobDto implements Record<ConcurrentQueueName, JobSettingsDto> {
+  @ApiProperty({ type: JobSettingsDto, description: undefined })
+  @ValidateNested()
+  @IsObject()
+  @Type(() => JobSettingsDto)
+  [QueueName.ThumbnailGeneration]!: JobSettingsDto;
+
+  @ApiProperty({ type: JobSettingsDto, description: undefined })
+  @ValidateNested()
+  @IsObject()
+  @Type(() => JobSettingsDto)
+  [QueueName.MetadataExtraction]!: JobSettingsDto;
+
+  @ApiProperty({ type: JobSettingsDto, description: undefined })
+  @ValidateNested()
+  @IsObject()
+  @Type(() => JobSettingsDto)
+  [QueueName.VideoConversion]!: JobSettingsDto;
+
+  @ApiProperty({ type: JobSettingsDto, description: undefined })
+  @ValidateNested()
+  @IsObject()
+  @Type(() => JobSettingsDto)
+  [QueueName.SmartSearch]!: JobSettingsDto;
+
+  @ApiProperty({ type: JobSettingsDto, description: undefined })
+  @ValidateNested()
+  @IsObject()
+  @Type(() => JobSettingsDto)
+  [QueueName.Migration]!: JobSettingsDto;
+
+  @ApiProperty({ type: JobSettingsDto, description: undefined })
+  @ValidateNested()
+  @IsObject()
+  @Type(() => JobSettingsDto)
+  [QueueName.BackgroundTask]!: JobSettingsDto;
+
+  @ApiProperty({ type: JobSettingsDto, description: undefined })
+  @ValidateNested()
+  @IsObject()
+  @Type(() => JobSettingsDto)
+  [QueueName.Search]!: JobSettingsDto;
+
+  @ApiProperty({ type: JobSettingsDto, description: undefined })
+  @ValidateNested()
+  @IsObject()
+  @Type(() => JobSettingsDto)
+  [QueueName.FaceDetection]!: JobSettingsDto;
+
+  @ApiProperty({ type: JobSettingsDto, description: undefined })
+  @ValidateNested()
+  @IsObject()
+  @Type(() => JobSettingsDto)
+  [QueueName.Ocr]!: JobSettingsDto;
+
+  @ApiProperty({ type: JobSettingsDto, description: undefined })
+  @ValidateNested()
+  @IsObject()
+  @Type(() => JobSettingsDto)
+  [QueueName.PetDetection]!: JobSettingsDto;
+
+  @ApiProperty({ type: JobSettingsDto, description: undefined })
+  @ValidateNested()
+  @IsObject()
+  @Type(() => JobSettingsDto)
+  [QueueName.Sidecar]!: JobSettingsDto;
+
+  @ApiProperty({ type: JobSettingsDto, description: undefined })
+  @ValidateNested()
+  @IsObject()
+  @Type(() => JobSettingsDto)
+  [QueueName.Library]!: JobSettingsDto;
+
+  @ApiProperty({ type: JobSettingsDto, description: undefined })
+  @ValidateNested()
+  @IsObject()
+  @Type(() => JobSettingsDto)
+  [QueueName.Notification]!: JobSettingsDto;
+
+  @ApiProperty({ type: JobSettingsDto, description: undefined })
+  @ValidateNested()
+  @IsObject()
+  @Type(() => JobSettingsDto)
+  [QueueName.Workflow]!: JobSettingsDto;
+
+  @ApiProperty({ type: JobSettingsDto, description: undefined })
+  @ValidateNested()
+  @IsObject()
+  @Type(() => JobSettingsDto)
+  [QueueName.Editor]!: JobSettingsDto;
+
+  @ApiProperty({ type: JobSettingsDto, description: undefined })
+  @ValidateNested()
+  @IsObject()
+  @Type(() => JobSettingsDto)
+  [QueueName.Classification]!: JobSettingsDto;
+}
+
+class SystemConfigLibraryScanDto {
+  @ValidateBoolean({ description: 'Enabled' })
+  enabled!: boolean;
+
+  @ValidateIf(isLibraryScanEnabled)
+  @IsNotEmpty()
+  @IsCronExpression()
+  @IsString()
+  cronExpression!: string;
+}
+
+class SystemConfigLibraryWatchDto {
+  @ValidateBoolean({ description: 'Enabled' })
+  enabled!: boolean;
+}
+
+class SystemConfigLibraryDto {
+  @Type(() => SystemConfigLibraryScanDto)
+  @ValidateNested()
+  @IsObject()
+  scan!: SystemConfigLibraryScanDto;
+
+  @Type(() => SystemConfigLibraryWatchDto)
+  @ValidateNested()
+  @IsObject()
+  watch!: SystemConfigLibraryWatchDto;
+}
+
+class SystemConfigLoggingDto {
+  @ValidateBoolean({ description: 'Enabled' })
+  enabled!: boolean;
+
+  @ValidateEnum({ enum: LogLevel, name: 'LogLevel' })
+  level!: LogLevel;
+}
+
+class MachineLearningAvailabilityChecksDto {
+  @ValidateBoolean({ description: 'Enabled' })
+  enabled!: boolean;
+
+  @IsInt()
+  timeout!: number;
+
+  @IsInt()
+  interval!: number;
+}
+
+class SystemConfigMachineLearningDto {
+  @ValidateBoolean({ description: 'Enabled' })
+  enabled!: boolean;
+
+  @IsUrl({ require_tld: false, allow_underscores: true }, { each: true })
+  @ArrayMinSize(1)
+  @ValidateIf((dto) => dto.enabled)
+  @ApiProperty({ type: 'array', items: { type: 'string', format: 'uri' }, minItems: 1 })
+  urls!: string[];
+
+  @Type(() => MachineLearningAvailabilityChecksDto)
+  @ValidateNested()
+  @IsObject()
+  availabilityChecks!: MachineLearningAvailabilityChecksDto;
+
+  @Type(() => CLIPConfig)
+  @ValidateNested()
+  @IsObject()
+  clip!: CLIPConfig;
+
+  @Type(() => DuplicateDetectionConfig)
+  @ValidateNested()
+  @IsObject()
+  duplicateDetection!: DuplicateDetectionConfig;
+
+  @Type(() => FacialRecognitionConfig)
+  @ValidateNested()
+  @IsObject()
+  facialRecognition!: FacialRecognitionConfig;
+
+  @Type(() => OcrConfig)
+  @ValidateNested()
+  @IsObject()
+  ocr!: OcrConfig;
+
+  @Type(() => PetDetectionConfig)
+  @ValidateNested()
+  @IsObject()
+  petDetection!: PetDetectionConfig;
+}
+
+enum MapTheme {
+  LIGHT = 'light',
+  DARK = 'dark',
+}
+
+export class MapThemeDto {
+  @ValidateEnum({ enum: MapTheme, name: 'MapTheme' })
+  theme!: MapTheme;
+}
+
+class SystemConfigMapDto {
+  @ValidateBoolean({ description: 'Enabled' })
+  enabled!: boolean;
+
+  @IsNotEmpty()
+  @IsUrl()
+  lightStyle!: string;
+
+  @IsNotEmpty()
+  @IsUrl()
+  darkStyle!: string;
+}
+
+class SystemConfigNewVersionCheckDto {
+  @ValidateBoolean({ description: 'Enabled' })
+  enabled!: boolean;
+}
+
+class SystemConfigNightlyTasksDto {
+  @IsDateStringFormat('HH:mm', { message: 'startTime must be in HH:mm format' })
+  startTime!: string;
+
+  @ValidateBoolean({ description: 'Database cleanup' })
+  databaseCleanup!: boolean;
+
+  @ValidateBoolean({ description: 'Missing thumbnails' })
+  missingThumbnails!: boolean;
+
+  @ValidateBoolean({ description: 'Cluster new faces' })
+  clusterNewFaces!: boolean;
+
+  @ValidateBoolean({ description: 'Generate memories' })
+  generateMemories!: boolean;
+
+  @ValidateBoolean({ description: 'Sync quota usage' })
+  syncQuotaUsage!: boolean;
+}
+
+class SystemConfigOAuthDto {
+  @ValidateBoolean({ description: 'Auto launch' })
+  autoLaunch!: boolean;
+
+  @ValidateBoolean({ description: 'Auto register' })
+  autoRegister!: boolean;
+
+  @IsString()
+  @ApiProperty({ description: 'Button text' })
+  buttonText!: string;
+
+  @ValidateIf(isOAuthEnabled)
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({ description: 'Client ID' })
+  clientId!: string;
+
+  @ValidateIf(isOAuthEnabled)
+  @IsString()
+  @ApiProperty({ description: 'Client secret' })
+  clientSecret!: string;
+
+  @ValidateEnum({
+    enum: OAuthTokenEndpointAuthMethod,
+    name: 'OAuthTokenEndpointAuthMethod',
+    description: 'Token endpoint auth method',
   })
   .meta({ id: 'SystemConfigSmtpTransportDto' });
 

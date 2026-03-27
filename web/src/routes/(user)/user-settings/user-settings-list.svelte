@@ -1,11 +1,20 @@
 <script lang="ts">
   import { page } from '$app/stores';
+<<<<<<< HEAD:web/src/routes/(user)/user-settings/user-settings-list.svelte
   import ChangePinCodeSettings from './PinCodeSettings.svelte';
   import DownloadSettings from './download-settings.svelte';
   import FeatureSettings from './feature-settings.svelte';
   import NotificationsSettings from './notifications-settings.svelte';
   import UserPurchaseSettings from './user-purchase-settings.svelte';
   import UserUsageStatistic from './user-usage-statistic.svelte';
+  import ChangePinCodeSettings from '$lib/components/user-settings-page/PinCodeSettings.svelte';
+  import ClassificationSettings from '$lib/components/user-settings-page/classification-settings.svelte';
+  import DownloadSettings from '$lib/components/user-settings-page/download-settings.svelte';
+  import FeatureSettings from '$lib/components/user-settings-page/feature-settings.svelte';
+  import GroupSettings from '$lib/components/user-settings-page/group-settings.svelte';
+  import NotificationsSettings from '$lib/components/user-settings-page/notifications-settings.svelte';
+  import UserPurchaseSettings from '$lib/components/user-settings-page/user-purchase-settings.svelte';
+  import UserUsageStatistic from '$lib/components/user-settings-page/user-usage-statistic.svelte';
   import { OpenQueryParam, QueryParameter } from '$lib/constants';
   import { featureFlagsManager } from '$lib/managers/feature-flags-manager.svelte';
   import { oauth } from '$lib/utils';
@@ -23,6 +32,7 @@
     mdiFormTextboxPassword,
     mdiKeyOutline,
     mdiLockSmart,
+    mdiMagnifyScan,
     mdiServerOutline,
     mdiTwoFactorAuthentication,
   } from '@mdi/js';
@@ -101,6 +111,15 @@
     subtitle={$t('features_setting_description')}
   >
     <FeatureSettings />
+  </SettingAccordion>
+
+  <SettingAccordion
+    icon={mdiMagnifyScan}
+    key="auto-classification"
+    title="Auto-Classification"
+    subtitle="Automatically tag and archive photos by category"
+  >
+    <ClassificationSettings />
   </SettingAccordion>
 
   <SettingAccordion
