@@ -1,6 +1,5 @@
 <script lang="ts">
   import { page } from '$app/stores';
-<<<<<<< HEAD:web/src/routes/(user)/user-settings/user-settings-list.svelte
   import ChangePinCodeSettings from './PinCodeSettings.svelte';
   import DownloadSettings from './download-settings.svelte';
   import FeatureSettings from './feature-settings.svelte';

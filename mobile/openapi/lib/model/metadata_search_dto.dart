@@ -20,6 +20,8 @@ class MetadataSearchDto {
     this.createdAfter,
     this.createdBefore,
     this.description,
+    this.deviceAssetId,
+    this.deviceId,
     this.encodedVideoPath,
     this.id,
     this.isEncoded,
@@ -32,7 +34,7 @@ class MetadataSearchDto {
     this.make,
     this.model,
     this.ocr,
-    this.order,
+    this.order = AssetOrder.desc,
     this.originalFileName,
     this.originalPath,
     this.page,
@@ -40,6 +42,8 @@ class MetadataSearchDto {
     this.previewPath,
     this.rating,
     this.size,
+    this.spaceId,
+    this.spacePersonIds = const [],
     this.state,
     this.tagIds = const [],
     this.takenAfter,
@@ -101,6 +105,24 @@ class MetadataSearchDto {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   String? description;
+
+  /// Filter by device asset ID
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? deviceAssetId;
+
+  /// Device ID to filter by
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? deviceId;
 
   /// Filter by encoded video file path
   ///
@@ -172,6 +194,12 @@ class MetadataSearchDto {
   String? libraryId;
 
   /// Filter by camera make
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
   String? make;
 
   /// Filter by camera model
@@ -186,13 +214,8 @@ class MetadataSearchDto {
   ///
   String? ocr;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  AssetOrder? order;
+  /// Sort order
+  AssetOrder order;
 
   /// Filter by original file name
   ///
@@ -253,6 +276,18 @@ class MetadataSearchDto {
   ///
   num? size;
 
+  /// Shared space ID to filter by
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? spaceId;
+
+  /// Shared space person IDs to filter by
+  List<String> spacePersonIds;
+
   /// Filter by state/province name
   String? state;
 
@@ -304,6 +339,7 @@ class MetadataSearchDto {
   ///
   DateTime? trashedBefore;
 
+  /// Asset type filter
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -330,6 +366,7 @@ class MetadataSearchDto {
   ///
   DateTime? updatedBefore;
 
+  /// Filter by visibility
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -383,6 +420,8 @@ class MetadataSearchDto {
     other.createdAfter == createdAfter &&
     other.createdBefore == createdBefore &&
     other.description == description &&
+    other.deviceAssetId == deviceAssetId &&
+    other.deviceId == deviceId &&
     other.encodedVideoPath == encodedVideoPath &&
     other.id == id &&
     other.isEncoded == isEncoded &&
@@ -403,6 +442,8 @@ class MetadataSearchDto {
     other.previewPath == previewPath &&
     other.rating == rating &&
     other.size == size &&
+    other.spaceId == spaceId &&
+    _deepEquality.equals(other.spacePersonIds, spacePersonIds) &&
     other.state == state &&
     _deepEquality.equals(other.tagIds, tagIds) &&
     other.takenAfter == takenAfter &&
@@ -429,6 +470,8 @@ class MetadataSearchDto {
     (createdAfter == null ? 0 : createdAfter!.hashCode) +
     (createdBefore == null ? 0 : createdBefore!.hashCode) +
     (description == null ? 0 : description!.hashCode) +
+    (deviceAssetId == null ? 0 : deviceAssetId!.hashCode) +
+    (deviceId == null ? 0 : deviceId!.hashCode) +
     (encodedVideoPath == null ? 0 : encodedVideoPath!.hashCode) +
     (id == null ? 0 : id!.hashCode) +
     (isEncoded == null ? 0 : isEncoded!.hashCode) +
@@ -441,7 +484,7 @@ class MetadataSearchDto {
     (make == null ? 0 : make!.hashCode) +
     (model == null ? 0 : model!.hashCode) +
     (ocr == null ? 0 : ocr!.hashCode) +
-    (order == null ? 0 : order!.hashCode) +
+    (order.hashCode) +
     (originalFileName == null ? 0 : originalFileName!.hashCode) +
     (originalPath == null ? 0 : originalPath!.hashCode) +
     (page == null ? 0 : page!.hashCode) +
@@ -449,6 +492,8 @@ class MetadataSearchDto {
     (previewPath == null ? 0 : previewPath!.hashCode) +
     (rating == null ? 0 : rating!.hashCode) +
     (size == null ? 0 : size!.hashCode) +
+    (spaceId == null ? 0 : spaceId!.hashCode) +
+    (spacePersonIds.hashCode) +
     (state == null ? 0 : state!.hashCode) +
     (tagIds == null ? 0 : tagIds!.hashCode) +
     (takenAfter == null ? 0 : takenAfter!.hashCode) +
@@ -466,7 +511,7 @@ class MetadataSearchDto {
     (withStacked == null ? 0 : withStacked!.hashCode);
 
   @override
-  String toString() => 'MetadataSearchDto[albumIds=$albumIds, checksum=$checksum, city=$city, country=$country, createdAfter=$createdAfter, createdBefore=$createdBefore, description=$description, encodedVideoPath=$encodedVideoPath, id=$id, isEncoded=$isEncoded, isFavorite=$isFavorite, isMotion=$isMotion, isNotInAlbum=$isNotInAlbum, isOffline=$isOffline, lensModel=$lensModel, libraryId=$libraryId, make=$make, model=$model, ocr=$ocr, order=$order, originalFileName=$originalFileName, originalPath=$originalPath, page=$page, personIds=$personIds, previewPath=$previewPath, rating=$rating, size=$size, state=$state, tagIds=$tagIds, takenAfter=$takenAfter, takenBefore=$takenBefore, thumbnailPath=$thumbnailPath, trashedAfter=$trashedAfter, trashedBefore=$trashedBefore, type=$type, updatedAfter=$updatedAfter, updatedBefore=$updatedBefore, visibility=$visibility, withDeleted=$withDeleted, withExif=$withExif, withPeople=$withPeople, withStacked=$withStacked]';
+  String toString() => 'MetadataSearchDto[albumIds=$albumIds, checksum=$checksum, city=$city, country=$country, createdAfter=$createdAfter, createdBefore=$createdBefore, description=$description, deviceAssetId=$deviceAssetId, deviceId=$deviceId, encodedVideoPath=$encodedVideoPath, id=$id, isEncoded=$isEncoded, isFavorite=$isFavorite, isMotion=$isMotion, isNotInAlbum=$isNotInAlbum, isOffline=$isOffline, lensModel=$lensModel, libraryId=$libraryId, make=$make, model=$model, ocr=$ocr, order=$order, originalFileName=$originalFileName, originalPath=$originalPath, page=$page, personIds=$personIds, previewPath=$previewPath, rating=$rating, size=$size, spaceId=$spaceId, spacePersonIds=$spacePersonIds, state=$state, tagIds=$tagIds, takenAfter=$takenAfter, takenBefore=$takenBefore, thumbnailPath=$thumbnailPath, trashedAfter=$trashedAfter, trashedBefore=$trashedBefore, type=$type, updatedAfter=$updatedAfter, updatedBefore=$updatedBefore, visibility=$visibility, withDeleted=$withDeleted, withExif=$withExif, withPeople=$withPeople, withStacked=$withStacked]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -487,16 +532,12 @@ class MetadataSearchDto {
     //  json[r'country'] = null;
     }
     if (this.createdAfter != null) {
-      json[r'createdAfter'] = _isEpochMarker(r'/^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$/')
-        ? this.createdAfter!.millisecondsSinceEpoch
-        : this.createdAfter!.toUtc().toIso8601String();
+      json[r'createdAfter'] = this.createdAfter!.toUtc().toIso8601String();
     } else {
     //  json[r'createdAfter'] = null;
     }
     if (this.createdBefore != null) {
-      json[r'createdBefore'] = _isEpochMarker(r'/^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$/')
-        ? this.createdBefore!.millisecondsSinceEpoch
-        : this.createdBefore!.toUtc().toIso8601String();
+      json[r'createdBefore'] = this.createdBefore!.toUtc().toIso8601String();
     } else {
     //  json[r'createdBefore'] = null;
     }
@@ -504,6 +545,16 @@ class MetadataSearchDto {
       json[r'description'] = this.description;
     } else {
     //  json[r'description'] = null;
+    }
+    if (this.deviceAssetId != null) {
+      json[r'deviceAssetId'] = this.deviceAssetId;
+    } else {
+    //  json[r'deviceAssetId'] = null;
+    }
+    if (this.deviceId != null) {
+      json[r'deviceId'] = this.deviceId;
+    } else {
+    //  json[r'deviceId'] = null;
     }
     if (this.encodedVideoPath != null) {
       json[r'encodedVideoPath'] = this.encodedVideoPath;
@@ -565,11 +616,7 @@ class MetadataSearchDto {
     } else {
     //  json[r'ocr'] = null;
     }
-    if (this.order != null) {
       json[r'order'] = this.order;
-    } else {
-    //  json[r'order'] = null;
-    }
     if (this.originalFileName != null) {
       json[r'originalFileName'] = this.originalFileName;
     } else {
@@ -601,6 +648,12 @@ class MetadataSearchDto {
     } else {
     //  json[r'size'] = null;
     }
+    if (this.spaceId != null) {
+      json[r'spaceId'] = this.spaceId;
+    } else {
+    //  json[r'spaceId'] = null;
+    }
+      json[r'spacePersonIds'] = this.spacePersonIds;
     if (this.state != null) {
       json[r'state'] = this.state;
     } else {
@@ -612,16 +665,12 @@ class MetadataSearchDto {
     //  json[r'tagIds'] = null;
     }
     if (this.takenAfter != null) {
-      json[r'takenAfter'] = _isEpochMarker(r'/^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$/')
-        ? this.takenAfter!.millisecondsSinceEpoch
-        : this.takenAfter!.toUtc().toIso8601String();
+      json[r'takenAfter'] = this.takenAfter!.toUtc().toIso8601String();
     } else {
     //  json[r'takenAfter'] = null;
     }
     if (this.takenBefore != null) {
-      json[r'takenBefore'] = _isEpochMarker(r'/^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$/')
-        ? this.takenBefore!.millisecondsSinceEpoch
-        : this.takenBefore!.toUtc().toIso8601String();
+      json[r'takenBefore'] = this.takenBefore!.toUtc().toIso8601String();
     } else {
     //  json[r'takenBefore'] = null;
     }
@@ -631,16 +680,12 @@ class MetadataSearchDto {
     //  json[r'thumbnailPath'] = null;
     }
     if (this.trashedAfter != null) {
-      json[r'trashedAfter'] = _isEpochMarker(r'/^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$/')
-        ? this.trashedAfter!.millisecondsSinceEpoch
-        : this.trashedAfter!.toUtc().toIso8601String();
+      json[r'trashedAfter'] = this.trashedAfter!.toUtc().toIso8601String();
     } else {
     //  json[r'trashedAfter'] = null;
     }
     if (this.trashedBefore != null) {
-      json[r'trashedBefore'] = _isEpochMarker(r'/^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$/')
-        ? this.trashedBefore!.millisecondsSinceEpoch
-        : this.trashedBefore!.toUtc().toIso8601String();
+      json[r'trashedBefore'] = this.trashedBefore!.toUtc().toIso8601String();
     } else {
     //  json[r'trashedBefore'] = null;
     }
@@ -650,16 +695,12 @@ class MetadataSearchDto {
     //  json[r'type'] = null;
     }
     if (this.updatedAfter != null) {
-      json[r'updatedAfter'] = _isEpochMarker(r'/^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$/')
-        ? this.updatedAfter!.millisecondsSinceEpoch
-        : this.updatedAfter!.toUtc().toIso8601String();
+      json[r'updatedAfter'] = this.updatedAfter!.toUtc().toIso8601String();
     } else {
     //  json[r'updatedAfter'] = null;
     }
     if (this.updatedBefore != null) {
-      json[r'updatedBefore'] = _isEpochMarker(r'/^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$/')
-        ? this.updatedBefore!.millisecondsSinceEpoch
-        : this.updatedBefore!.toUtc().toIso8601String();
+      json[r'updatedBefore'] = this.updatedBefore!.toUtc().toIso8601String();
     } else {
     //  json[r'updatedBefore'] = null;
     }
@@ -706,9 +747,11 @@ class MetadataSearchDto {
         checksum: mapValueOfType<String>(json, r'checksum'),
         city: mapValueOfType<String>(json, r'city'),
         country: mapValueOfType<String>(json, r'country'),
-        createdAfter: mapDateTime(json, r'createdAfter', r'/^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$/'),
-        createdBefore: mapDateTime(json, r'createdBefore', r'/^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$/'),
+        createdAfter: mapDateTime(json, r'createdAfter', r''),
+        createdBefore: mapDateTime(json, r'createdBefore', r''),
         description: mapValueOfType<String>(json, r'description'),
+        deviceAssetId: mapValueOfType<String>(json, r'deviceAssetId'),
+        deviceId: mapValueOfType<String>(json, r'deviceId'),
         encodedVideoPath: mapValueOfType<String>(json, r'encodedVideoPath'),
         id: mapValueOfType<String>(json, r'id'),
         isEncoded: mapValueOfType<bool>(json, r'isEncoded'),
@@ -721,10 +764,12 @@ class MetadataSearchDto {
         make: mapValueOfType<String>(json, r'make'),
         model: mapValueOfType<String>(json, r'model'),
         ocr: mapValueOfType<String>(json, r'ocr'),
-        order: AssetOrder.fromJson(json[r'order']),
+        order: AssetOrder.fromJson(json[r'order']) ?? AssetOrder.desc,
         originalFileName: mapValueOfType<String>(json, r'originalFileName'),
         originalPath: mapValueOfType<String>(json, r'originalPath'),
-        page: num.parse('${json[r'page']}'),
+        page: json[r'page'] == null
+            ? null
+            : num.parse('${json[r'page']}'),
         personIds: json[r'personIds'] is Iterable
             ? (json[r'personIds'] as Iterable).cast<String>().toList(growable: false)
             : const [],
@@ -732,19 +777,25 @@ class MetadataSearchDto {
         rating: json[r'rating'] == null
             ? null
             : num.parse('${json[r'rating']}'),
-        size: num.parse('${json[r'size']}'),
+        size: json[r'size'] == null
+            ? null
+            : num.parse('${json[r'size']}'),
+        spaceId: mapValueOfType<String>(json, r'spaceId'),
+        spacePersonIds: json[r'spacePersonIds'] is Iterable
+            ? (json[r'spacePersonIds'] as Iterable).cast<String>().toList(growable: false)
+            : const [],
         state: mapValueOfType<String>(json, r'state'),
         tagIds: json[r'tagIds'] is Iterable
             ? (json[r'tagIds'] as Iterable).cast<String>().toList(growable: false)
             : const [],
-        takenAfter: mapDateTime(json, r'takenAfter', r'/^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$/'),
-        takenBefore: mapDateTime(json, r'takenBefore', r'/^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$/'),
+        takenAfter: mapDateTime(json, r'takenAfter', r''),
+        takenBefore: mapDateTime(json, r'takenBefore', r''),
         thumbnailPath: mapValueOfType<String>(json, r'thumbnailPath'),
-        trashedAfter: mapDateTime(json, r'trashedAfter', r'/^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$/'),
-        trashedBefore: mapDateTime(json, r'trashedBefore', r'/^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$/'),
+        trashedAfter: mapDateTime(json, r'trashedAfter', r''),
+        trashedBefore: mapDateTime(json, r'trashedBefore', r''),
         type: AssetTypeEnum.fromJson(json[r'type']),
-        updatedAfter: mapDateTime(json, r'updatedAfter', r'/^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$/'),
-        updatedBefore: mapDateTime(json, r'updatedBefore', r'/^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$/'),
+        updatedAfter: mapDateTime(json, r'updatedAfter', r''),
+        updatedBefore: mapDateTime(json, r'updatedBefore', r''),
         visibility: AssetVisibility.fromJson(json[r'visibility']),
         withDeleted: mapValueOfType<bool>(json, r'withDeleted'),
         withExif: mapValueOfType<bool>(json, r'withExif'),
