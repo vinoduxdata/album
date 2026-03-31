@@ -26,9 +26,12 @@ const PersonCreateSchema = z
   })
   .meta({ id: 'PersonCreateDto' });
 
-const PersonUpdateSchema = PersonCreateSchema.extend({
-  featureFaceAssetId: z.uuidv4().optional().describe('Asset ID used for feature face thumbnail'),
-}).meta({ id: 'PersonUpdateDto' });
+export class PersonWithFacesResponseDto extends PersonResponseDto {
+  @ApiProperty({ description: 'Face detections' })
+  faces!: AssetFaceWithoutPersonResponseDto[];
+  @ApiPropertyOptional({ description: 'Space person ID (when viewed through a space)' })
+  spacePersonId?: string;
+}
 
 const PeopleUpdateItemSchema = PersonUpdateSchema.extend({
   id: z.string().describe('Person ID'),

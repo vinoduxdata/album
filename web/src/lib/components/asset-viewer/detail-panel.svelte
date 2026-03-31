@@ -12,7 +12,8 @@
   import { Route } from '$lib/route';
   import { boundingBoxesArray } from '$lib/stores/people.store';
   import { locale } from '$lib/stores/preferences.store';
-  import { getAssetMediaUrl, getPeopleThumbnailUrl } from '$lib/utils';
+  import { preferences, user } from '$lib/stores/user.store';
+  import { createUrl, getAssetMediaUrl, getPeopleThumbnailUrl } from '$lib/utils';
   import { delay, getDimensions } from '$lib/utils/asset-utils';
   import { getByteUnitString } from '$lib/utils/byte-units';
   import { handleError } from '$lib/utils/handle-error';
@@ -50,9 +51,11 @@
   interface Props {
     asset: AssetResponseDto;
     currentAlbum?: AlbumResponseDto | null;
+    spaceId?: string;
   }
 
-  let { asset, currentAlbum = null }: Props = $props();
+  let { asset, currentAlbum = null, spaceId }: Props = $props();
+  let isSpaceMember = $derived(!!spaceId);
 
   let isOwner = $derived(authManager.authenticated && authManager.user.id === asset.ownerId);
   let people = $derived(asset.people || []);
@@ -111,8 +114,8 @@
   };
 
   const handleRefreshPeople = async () => {
-    asset = await getAssetInfo({ id: asset.id });
-    assetViewerManager.closeEditFacesPanel();
+    asset = await getAssetInfo({ id: asset.id, spaceId });
+    showEditFaces = false;
   };
 
   const getAssetFolderHref = (asset: AssetResponseDto) => {
@@ -297,20 +300,127 @@
               />
             {/if}
           </p>
-          {#if assetViewerManager.isShowAssetPath}
-            <p class="text-xs opacity-50 break-all pb-2 hover:text-primary" transition:slide={{ duration: 250 }}>
-              <!-- eslint-disable-next-line svelte/no-navigation-without-resolve this is supposed to be treated as an absolute/external link -->
-              <a href={getAssetFolderHref(asset)} title={$t('go_to_folder')} class="whitespace-pre-wrap">
-                {asset.originalPath}
-              </a>
-            </p>
+        </div>
+        <div class="rounded-b bg-red-500 px-4 py-2 text-white text-sm">
+          <p>{asset.originalPath}</p>
+        </div>
+      </div>
+    </section>
+  {/if}
+
+  <DetailPanelDescription {asset} {isOwner} />
+  <DetailPanelRating {asset} {isOwner} />
+
+  {#if !authManager.isSharedLink && (isOwner || isSpaceMember)}
+    <section class="px-4 pt-4 text-sm">
+      <div class="flex h-10 w-full items-center justify-between">
+        <Text size="small" color="muted">{$t('people')}</Text>
+        <div class="flex gap-2 items-center">
+          {#if isOwner}
+            {#if people.some((person) => person.isHidden)}
+              <IconButton
+                aria-label={$t('show_hidden_people')}
+                icon={showingHiddenPeople ? mdiEyeOff : mdiEye}
+                size="medium"
+                shape="round"
+                color="secondary"
+                variant="ghost"
+                onclick={() => (showingHiddenPeople = !showingHiddenPeople)}
+              />
+            {/if}
+            <IconButton
+              aria-label={$t('tag_people')}
+              icon={mdiPlus}
+              size="medium"
+              shape="round"
+              color="secondary"
+              variant="ghost"
+              onclick={() => (isFaceEditMode.value = !isFaceEditMode.value)}
+            />
           {/if}
-          {#if (asset.exifInfo?.exifImageHeight && asset.exifInfo?.exifImageWidth) || asset.exifInfo?.fileSizeInByte}
-            <div class="flex gap-2 text-sm">
-              {#if asset.exifInfo?.exifImageHeight && asset.exifInfo?.exifImageWidth}
-                {#if getMegapixel(asset.exifInfo.exifImageHeight, asset.exifInfo.exifImageWidth)}
-                  <p>
-                    {getMegapixel(asset.exifInfo.exifImageHeight, asset.exifInfo.exifImageWidth)} MP
+          <IconButton
+            aria-label={$t('tag_people')}
+            icon={mdiPlus}
+            size="medium"
+            shape="round"
+            color="secondary"
+            variant="ghost"
+            onclick={() => assetViewerManager.toggleFaceEditMode()}
+          />
+
+            {#if people.length > 0 || unassignedFaces.length > 0}
+              <IconButton
+                aria-label={$t('edit_people')}
+                icon={mdiPencil}
+                size="medium"
+                shape="round"
+                color="secondary"
+                variant="ghost"
+                onclick={() => (showEditFaces = true)}
+              />
+            {/if}
+          {/if}
+        </div>
+      </div>
+
+      <div class="mt-2 flex flex-wrap gap-2">
+        {#each people as person, index (person.id)}
+          {#if showingHiddenPeople || !person.isHidden}
+            {@const isHighlighted = people[index].faces.some((f) => $boundingBoxesArray.some((b) => b.id === f.id))}
+            <a
+              class="group w-22 outline-none"
+              href={spaceId && person.spacePersonId
+                ? Route.viewSpacePerson(spaceId, person.spacePersonId)
+                : Route.viewPerson(person, { previousRoute })}
+              onfocus={() => ($boundingBoxesArray = people[index].faces)}
+              onblur={() => ($boundingBoxesArray = [])}
+              onmouseover={() => ($boundingBoxesArray = people[index].faces)}
+              onmouseleave={() => ($boundingBoxesArray = [])}
+            >
+              <div class="relative">
+                <ImageThumbnail
+                  curve
+                  shadow
+                  url={spaceId && person.spacePersonId
+                    ? createUrl(`/shared-spaces/${spaceId}/people/${person.spacePersonId}/thumbnail`, {
+                        updatedAt: person.updatedAt,
+                      })
+                    : getPeopleThumbnailUrl(person)}
+                  altText={person.name}
+                  title={person.name}
+                  widthStyle="90px"
+                  heightStyle="90px"
+                  hidden={person.isHidden}
+                  highlighted={isHighlighted}
+                  class="group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-immich-primary dark:group-focus-visible:outline-immich-dark-primary"
+                />
+              </div>
+              <p class="mt-1 truncate font-medium" title={person.name}>{person.name}</p>
+              {#if person.birthDate}
+                {@const personBirthDate = DateTime.fromISO(person.birthDate)}
+                {@const age = Math.floor(DateTime.fromISO(asset.localDateTime).diff(personBirthDate, 'years').years)}
+                {@const ageInMonths = Math.floor(
+                  DateTime.fromISO(asset.localDateTime).diff(personBirthDate, 'months').months,
+                )}
+                {#if age >= 0}
+                  <p
+                    class="font-light"
+                    title={personBirthDate.toLocaleString(
+                      {
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric',
+                      },
+                      { locale: $locale },
+                    )}
+                  >
+                    {#if ageInMonths <= 11}
+                      {$t('age_months', { values: { months: ageInMonths } })}
+                    {:else if ageInMonths > 12 && ageInMonths <= 23}
+                      {$t('age_year_months', { values: { months: ageInMonths - 12 } })}
+                    {:else}
+                      {$t('age_years', { values: { years: age } })}
+                    {/if}
                   </p>
                 {/if}
                 {@const { width, height } = getDimensions(asset.exifInfo)}
@@ -495,6 +605,12 @@
       <DetailPanelTags {asset} {isOwner} />
     </section>
   {/if}
+{/await}
+
+{#if $preferences?.tags?.enabled}
+  <section class="relative px-2 pb-12 dark:bg-immich-dark-bg dark:text-immich-dark-fg">
+    <DetailPanelTags {asset} {isOwner} {spaceId} />
+  </section>
 {/if}
 
 {#if assetViewerManager.isEditFacesPanelOpen}
