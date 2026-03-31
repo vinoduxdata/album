@@ -57,74 +57,14 @@ const SanitizedAssetResponseSchema = z
 
 export class SanitizedAssetResponseDto extends createZodDto(SanitizedAssetResponseSchema) {}
 
-const AssetStackResponseSchema = z
-  .object({
-    id: z.string().describe('Stack ID'),
-    primaryAssetId: z.string().describe('Primary asset ID'),
-    assetCount: z.int().min(0).describe('Number of assets in stack'),
-  })
-  .meta({ id: 'AssetStackResponseDto' });
+  @Property({ description: 'Is resized', history: new HistoryBuilder().added('v1').deprecated('v1.113.0') })
+  resized?: boolean;
+  @Property({ description: 'Is edited', history: new HistoryBuilder().added('v2.5.0').beta('v2.5.0') })
+  isEdited!: boolean;
 
-export const AssetResponseSchema = SanitizedAssetResponseSchema.extend(
-  z.object({
-    // TODO: use `isoDatetimeToDate` when using `ZodSerializerDto` on the controllers.
-    createdAt: z
-      .string()
-      .meta({ format: 'date-time' })
-      .describe('The UTC timestamp when the asset was originally uploaded to Immich.'),
-    ownerId: z.string().describe('Owner user ID'),
-    owner: UserResponseSchema.optional(),
-    libraryId: z
-      .uuidv4()
-      .nullish()
-      .describe('Library ID')
-      .meta(new HistoryBuilder().added('v1').deprecated('v1').getExtensions()),
-    originalPath: z.string().describe('Original file path'),
-    originalFileName: z.string().describe('Original file name'),
-    // TODO: use `isoDatetimeToDate` when using `ZodSerializerDto` on the controllers.
-    fileCreatedAt: z
-      .string()
-      .meta({ format: 'date-time' })
-      .describe(
-        'The actual UTC timestamp when the file was created/captured, preserving timezone information. This is the authoritative timestamp for chronological sorting within timeline groups. Combined with timezone data, this can be used to determine the exact moment the photo was taken.',
-      ),
-    fileModifiedAt: z
-      .string()
-      .meta({ format: 'date-time' })
-      .describe(
-        'The UTC timestamp when the file was last modified on the filesystem. This reflects the last time the physical file was changed, which may be different from when the photo was originally taken.',
-      ),
-    updatedAt: z
-      .string()
-      .meta({ format: 'date-time' })
-      .describe(
-        'The UTC timestamp when the asset record was last updated in the database. This is automatically maintained by the database and reflects when any field in the asset was last modified.',
-      ),
-    isFavorite: z.boolean().describe('Is favorite'),
-    isArchived: z.boolean().describe('Is archived'),
-    isTrashed: z.boolean().describe('Is trashed'),
-    isOffline: z.boolean().describe('Is offline'),
-    visibility: AssetVisibilitySchema,
-    exifInfo: ExifResponseSchema.optional(),
-    tags: z.array(TagResponseSchema).optional(),
-    people: z.array(PersonWithFacesResponseSchema).optional(),
-    unassignedFaces: z.array(AssetFaceWithoutPersonResponseSchema).optional(),
-    checksum: z.string().describe('Base64 encoded SHA1 hash'),
-    stack: AssetStackResponseSchema.nullish(),
-    duplicateId: z.string().nullish().describe('Duplicate group ID'),
-    resized: z
-      .boolean()
-      .optional()
-      .describe('Is resized')
-      .meta(new HistoryBuilder().added('v1').deprecated('v1.113.0').getExtensions()),
-    isEdited: z
-      .boolean()
-      .describe('Is edited')
-      .meta(new HistoryBuilder().added('v2.5.0').beta('v2.5.0').getExtensions()),
-  }).shape,
-).meta({ id: 'AssetResponseDto' });
-
-export class AssetResponseDto extends createZodDto(AssetResponseSchema) {}
+  @ApiPropertyOptional({ description: 'Resolved space ID (when server auto-detects space context)' })
+  resolvedSpaceId?: string;
+}
 
 export type MapAsset = {
   createdAt: Date;
