@@ -329,16 +329,6 @@
                 onclick={() => (showingHiddenPeople = !showingHiddenPeople)}
               />
             {/if}
-            <IconButton
-              aria-label={$t('tag_people')}
-              icon={mdiPlus}
-              size="medium"
-              shape="round"
-              color="secondary"
-              variant="ghost"
-              onclick={() => (isFaceEditMode.value = !isFaceEditMode.value)}
-            />
-          {/if}
           <IconButton
             aria-label={$t('tag_people')}
             icon={mdiPlus}
