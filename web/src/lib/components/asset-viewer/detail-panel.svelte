@@ -329,15 +329,15 @@
                 onclick={() => (showingHiddenPeople = !showingHiddenPeople)}
               />
             {/if}
-          <IconButton
-            aria-label={$t('tag_people')}
-            icon={mdiPlus}
-            size="medium"
-            shape="round"
-            color="secondary"
-            variant="ghost"
-            onclick={() => assetViewerManager.toggleFaceEditMode()}
-          />
+            <IconButton
+              aria-label={$t('tag_people')}
+              icon={mdiPlus}
+              size="medium"
+              shape="round"
+              color="secondary"
+              variant="ghost"
+              onclick={() => assetViewerManager.toggleFaceEditMode()}
+            />
 
             {#if people.length > 0 || unassignedFaces.length > 0}
               <IconButton
