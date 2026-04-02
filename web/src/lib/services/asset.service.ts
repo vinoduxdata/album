@@ -6,6 +6,8 @@ import { eventManager } from '$lib/managers/event-manager.svelte';
 import AssetAddToAlbumModal from '$lib/modals/AssetAddToAlbumModal.svelte';
 import AssetTagModal from '$lib/modals/AssetTagModal.svelte';
 import SharedLinkCreateModal from '$lib/modals/SharedLinkCreateModal.svelte';
+import { user as authUser, preferences } from '$lib/stores/user.store';
+import { waitForWebsocketEvent } from '$lib/stores/websocket';
 import { getAssetMediaUrl, getSharedLink, sleep } from '$lib/utils';
 import { downloadUrl } from '$lib/utils/asset-utils';
 import { handleError } from '$lib/utils/handle-error';
