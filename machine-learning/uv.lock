@@ -988,12 +988,8 @@ requires-dist = [
     { name = "gunicorn", specifier = ">=21.1.0" },
     { name = "huggingface-hub", specifier = ">=0.20.1,<1.0" },
     { name = "insightface", specifier = ">=0.7.3,<1.0" },
-<<<<<<< HEAD
     { name = "numpy", specifier = "<2.4.0" },
-=======
-    { name = "numpy", specifier = ">=2.3.4" },
     { name = "onnx", specifier = ">=1.20.1" },
->>>>>>> cd5f5da31 (fix: path traversal protection and onnx update (#120))
     { name = "onnxruntime", marker = "extra == 'armnn'", specifier = ">=1.23.2,<2" },
     { name = "onnxruntime", marker = "extra == 'cpu'", specifier = ">=1.23.2,<2" },
     { name = "onnxruntime", marker = "extra == 'rknn'", specifier = ">=1.23.2,<2" },
