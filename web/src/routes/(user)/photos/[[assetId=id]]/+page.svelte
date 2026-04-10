@@ -249,7 +249,7 @@
     </div>
   {/snippet}
 
-  <div class="ml-4 flex h-full">
+  <div class="flex h-full">
     <FilterPanel
       bind:filters
       config={filterConfig}
