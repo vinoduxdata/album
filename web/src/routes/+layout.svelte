@@ -1,9 +1,12 @@
 <script lang="ts">
   import { afterNavigate, beforeNavigate } from '$app/navigation';
   import { page } from '$app/state';
-  import { getPagesProvider, getSettingsProvider } from '$lib/commands';
-  import DownloadPanel from './download-panel.svelte';
-  import ErrorLayout from './ErrorLayout.svelte';
+  import { shortcut, shortcuts } from '$lib/actions/shortcut';
+  import GlobalSearch from '$lib/components/global-search/global-search.svelte';
+  import { featureFlagsManager } from '$lib/managers/feature-flags-manager.svelte';
+  import { globalSearchManager, type SearchMode } from '$lib/managers/global-search-manager.svelte';
+  import DownloadPanel from '$lib/components/asset-viewer/download-panel.svelte';
+  import ErrorLayout from '$lib/components/layouts/ErrorLayout.svelte';
   import OnEvents from '$lib/components/OnEvents.svelte';
   import NavigationLoadingBar from './navigation-loading-bar.svelte';
   import UploadPanel from './upload-panel.svelte';
@@ -187,6 +190,40 @@
   {/if}
 </svelte:head>
 
+<svelte:document
+  use:shortcut={{
+    shortcut: { ctrl: true, shift: true, key: 'm' },
+    onShortcut: () => copyToClipboard(getMyImmichLink().toString()),
+  }}
+  use:shortcut={{
+    shortcut: { shift: true, key: 't' },
+    onShortcut: () => themeManager.toggleTheme(),
+  }}
+  use:shortcuts={[
+    {
+      shortcut: { ctrl: true, key: 'k' },
+      onShortcut: () => {
+        // Use valueOrUndefined so the shortcut never throws if it fires before
+        // feature flags have loaded (SSR→hydration race).
+        if (featureFlagsManager.valueOrUndefined?.search) {
+          globalSearchManager.toggle();
+        }
+      },
+    },
+    {
+      shortcut: { ctrl: true, key: '/' },
+      onShortcut: () => {
+        if (!globalSearchManager.isOpen) {
+          return;
+        }
+        const order: SearchMode[] = ['smart', 'metadata', 'description', 'ocr'];
+        const next = order[(order.indexOf(globalSearchManager.mode) + 1) % order.length];
+        globalSearchManager.setMode(next);
+      },
+    },
+  ]}
+/>
+
 <TooltipProvider>
   {#if page.data.error}
     <ErrorLayout error={page.data.error}></ErrorLayout>
@@ -200,17 +237,7 @@
 
   <DownloadPanel />
   <UploadPanel />
-  <ScreencastOverlay />
-
-  <CommandPaletteProvider
-    providers={[
-      getPagesProvider($t),
-      getSettingsProvider($t),
-      defaultProvider({ name: $t('documentation'), types: ['doc', 'documentation'], actions: CORE_PAGE_COMMANDS }),
-      defaultProvider({ name: $t('support'), actions: PROJECT_SUPPORT_COMMANDS }),
-      defaultProvider({ name: 'Socials', types: ['social', 'socials'], actions: SOCIAL_COMMANDS }),
-      defaultProvider({ name: $t('mobile_app'), actions: MOBILE_APP_COMMANDS }),
-      defaultProvider({ name: 'Sites', types: ['site', 'sites'], actions: OTHER_SITE_COMMANDS }),
-    ]}
-  />
+  {#if globalSearchManager.isOpen}
+    <GlobalSearch manager={globalSearchManager} />
+  {/if}
 </TooltipProvider>
