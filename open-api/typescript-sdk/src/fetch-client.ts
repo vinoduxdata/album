@@ -5133,7 +5133,7 @@ export function reassignFacesById({ id, faceDto }: {
 /**
  * Get filtered map markers
  */
-export function getFilteredMapMarkers({ city, country, isFavorite, make, model, personIds, rating, spaceId, tagIds, takenAfter, takenBefore, $type }: {
+export function getFilteredMapMarkers({ city, country, isFavorite, make, model, personIds, rating, spaceId, tagIds, takenAfter, takenBefore, $type, withSharedSpaces }: {
     city?: string;
     country?: string;
     isFavorite?: boolean;
@@ -5146,6 +5146,7 @@ export function getFilteredMapMarkers({ city, country, isFavorite, make, model, 
     takenAfter?: string;
     takenBefore?: string;
     $type?: "IMAGE" | "VIDEO";
+    withSharedSpaces?: boolean;
 }, opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
         status: 200;
@@ -5162,7 +5163,8 @@ export function getFilteredMapMarkers({ city, country, isFavorite, make, model, 
         tagIds,
         takenAfter,
         takenBefore,
-        "type": $type
+        "type": $type,
+        withSharedSpaces
     }))}`, {
         ...opts
     }));
@@ -5315,13 +5317,14 @@ export function validate({ id, validateLibraryDto }: {
 /**
  * Retrieve map markers
  */
-export function getMapMarkers({ fileCreatedAfter, fileCreatedBefore, isArchived, isFavorite, withPartners, withSharedAlbums }: {
+export function getMapMarkers({ fileCreatedAfter, fileCreatedBefore, isArchived, isFavorite, withPartners, withSharedAlbums, withSharedSpaces }: {
     fileCreatedAfter?: string;
     fileCreatedBefore?: string;
     isArchived?: boolean;
     isFavorite?: boolean;
     withPartners?: boolean;
     withSharedAlbums?: boolean;
+    withSharedSpaces?: boolean;
 }, opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
         status: 200;
@@ -5332,7 +5335,8 @@ export function getMapMarkers({ fileCreatedAfter, fileCreatedBefore, isArchived,
         isArchived,
         isFavorite,
         withPartners,
-        withSharedAlbums
+        withSharedAlbums,
+        withSharedSpaces
     }))}`, {
         ...opts
     }));
