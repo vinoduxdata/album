@@ -244,9 +244,16 @@ class LoginForm extends HookConsumerWidget {
         if (result.shouldChangePassword && !result.isAdmin) {
           unawaited(context.pushRoute(const ChangePasswordRoute()));
         } else {
-          await ref.read(galleryPermissionNotifier.notifier).requestGalleryPermission();
-          if (isSyncRemoteDeletionsMode()) {
-            await getManageMediaPermission();
+          final isBeta = Store.isBetaTimelineEnabled;
+          if (isBeta) {
+            await ref.read(galleryPermissionNotifier.notifier).requestGalleryPermission();
+            if (isSyncRemoteDeletionsMode()) {
+              await getManageMediaPermission();
+            }
+            unawaited(handleSyncFlow());
+            ref.read(websocketProvider.notifier).connect();
+            unawaited(context.replaceRoute(const GalleryTabShellRoute()));
+            return;
           }
           unawaited(handleSyncFlow());
           ref.read(websocketProvider.notifier).connect();
@@ -336,9 +343,16 @@ class LoginForm extends HookConsumerWidget {
             if (isSyncRemoteDeletionsMode()) {
               await getManageMediaPermission();
             }
-            unawaited(handleSyncFlow());
-            unawaited(context.replaceRoute(const TabShellRoute()));
-            return;
+            if (isBeta) {
+              await ref.read(galleryPermissionNotifier.notifier).requestGalleryPermission();
+              if (isSyncRemoteDeletionsMode()) {
+                await getManageMediaPermission();
+              }
+              unawaited(handleSyncFlow());
+              unawaited(context.replaceRoute(const GalleryTabShellRoute()));
+              return;
+            }
+            unawaited(context.replaceRoute(const TabControllerRoute()));
           }
         } catch (error, stack) {
           log.severe('Error logging in with OAuth: $error', stack);
