@@ -1,6 +1,5 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import DetailPanelDate from '$lib/components/asset-viewer/detail-panel-date.svelte';
   import DetailPanelDescription from '$lib/components/asset-viewer/detail-panel-description.svelte';
   import DetailPanelLocation from '$lib/components/asset-viewer/detail-panel-location.svelte';
   import DetailPanelRating from '$lib/components/asset-viewer/detail-panel-star-rating.svelte';
@@ -12,12 +11,9 @@
   import { Route } from '$lib/route';
   import { boundingBoxesArray } from '$lib/stores/people.store';
   import { locale } from '$lib/stores/preferences.store';
-  import { preferences, user } from '$lib/stores/user.store';
   import { createUrl, getAssetMediaUrl, getPeopleThumbnailUrl } from '$lib/utils';
-  import { delay, getDimensions } from '$lib/utils/asset-utils';
-  import { getByteUnitString } from '$lib/utils/byte-units';
+  import { delay } from '$lib/utils/asset-utils';
   import { handleError } from '$lib/utils/handle-error';
-  import { getParentPath } from '$lib/utils/tree-utils';
   import {
     AssetMediaSize,
     getAllAlbums,
@@ -25,22 +21,11 @@
     type AlbumResponseDto,
     type AssetResponseDto,
   } from '@immich/sdk';
-  import { Icon, IconButton, modalManager, Text } from '@immich/ui';
-  import {
-    mdiCamera,
-    mdiCameraIris,
-    mdiClose,
-    mdiEye,
-    mdiEyeOff,
-    mdiImageOutline,
-    mdiInformationOutline,
-    mdiPencil,
-    mdiPlus,
-  } from '@mdi/js';
+  import { Icon, IconButton, Text } from '@immich/ui';
+  import { mdiCamera, mdiCameraIris, mdiClose, mdiEye, mdiEyeOff, mdiPencil, mdiPlus } from '@mdi/js';
   import { DateTime } from 'luxon';
   import { onDestroy } from 'svelte';
   import { t } from 'svelte-i18n';
-  import { slide } from 'svelte/transition';
   import ImageThumbnail from '../assets/thumbnail/image-thumbnail.svelte';
   import PersonSidePanel from '../faces-page/person-side-panel.svelte';
   import OnEvents from '../OnEvents.svelte';
@@ -104,24 +89,9 @@
     previousId = asset.id;
   });
 
-  const getMegapixel = (width: number, height: number): number | undefined => {
-    const megapixel = Math.round((height * width) / 1_000_000);
-
-    if (megapixel) {
-      return megapixel;
-    }
-
-    return undefined;
-  };
-
   const handleRefreshPeople = async () => {
     asset = await getAssetInfo({ id: asset.id, spaceId: effectiveSpaceId });
-    showEditFaces = false;
-  };
-
-  const getAssetFolderHref = (asset: AssetResponseDto) => {
-    // Remove the last part of the path to get the parent path
-    return Route.folders({ path: getParentPath(asset.originalPath) });
+    assetViewerManager.closeEditFacesPanel();
   };
 
   onDestroy(() => {
@@ -205,7 +175,7 @@
                   shape="round"
                   color="secondary"
                   variant="ghost"
-                  onclick={() => (showEditFaces = true)}
+                  onclick={() => assetViewerManager.openEditFacesPanel()}
                 />
               {/if}
             {/if}

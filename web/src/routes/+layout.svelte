@@ -2,10 +2,13 @@
   import { afterNavigate, beforeNavigate } from '$app/navigation';
   import { page } from '$app/state';
   import { shortcut, shortcuts } from '$lib/actions/shortcut';
+  import { getMyImmichLink } from '$lib/commands';
   import GlobalSearch from '$lib/components/global-search/global-search.svelte';
+  import { authManager } from '$lib/managers/auth-manager.svelte';
   import { featureFlagsManager } from '$lib/managers/feature-flags-manager.svelte';
   import { closePaletteOnNavigate } from '$lib/managers/close-palette-on-navigate';
   import { globalSearchManager, type SearchMode } from '$lib/managers/global-search-manager.svelte';
+  import { copyToClipboard } from '$lib/utils';
   import DownloadPanel from '$lib/components/asset-viewer/download-panel.svelte';
   import ErrorLayout from '$lib/components/layouts/ErrorLayout.svelte';
   import OnEvents from '$lib/components/OnEvents.svelte';
@@ -23,17 +26,9 @@
   import { maintenanceShouldRedirect } from '$lib/utils/maintenance';
   import { getServerConfig } from '@immich/sdk';
   import {
-    CommandPaletteProvider,
-    CORE_PAGE_COMMANDS,
-    defaultProvider,
-    MOBILE_APP_COMMANDS,
     modalManager,
-    OTHER_SITE_COMMANDS,
-    PROJECT_SUPPORT_COMMANDS,
-    ScreencastOverlay,
     setLocale,
     setTranslations,
-    SOCIAL_COMMANDS,
     Theme,
     themeManager,
     toastManager,
@@ -200,7 +195,7 @@
   }}
   use:shortcut={{
     shortcut: { shift: true, key: 't' },
-    onShortcut: () => themeManager.toggleTheme(),
+    onShortcut: () => themeManager.toggle(),
   }}
   use:shortcuts={[
     {

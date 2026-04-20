@@ -1,20 +1,8 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import ChangePinCodeSettings from './PinCodeSettings.svelte';
-  import DownloadSettings from './download-settings.svelte';
-  import FeatureSettings from './feature-settings.svelte';
-  import NotificationsSettings from './notifications-settings.svelte';
-  import UserPurchaseSettings from './user-purchase-settings.svelte';
-  import UserUsageStatistic from './user-usage-statistic.svelte';
-  import ChangePinCodeSettings from '$lib/components/user-settings-page/PinCodeSettings.svelte';
-
-  import DownloadSettings from '$lib/components/user-settings-page/download-settings.svelte';
-  import FeatureSettings from '$lib/components/user-settings-page/feature-settings.svelte';
   import GroupSettings from '$lib/components/user-settings-page/group-settings.svelte';
-  import NotificationsSettings from '$lib/components/user-settings-page/notifications-settings.svelte';
-  import UserPurchaseSettings from '$lib/components/user-settings-page/user-purchase-settings.svelte';
-  import UserUsageStatistic from '$lib/components/user-settings-page/user-usage-statistic.svelte';
   import { OpenQueryParam, QueryParameter } from '$lib/constants';
+  import { authManager } from '$lib/managers/auth-manager.svelte';
   import { featureFlagsManager } from '$lib/managers/feature-flags-manager.svelte';
   import { oauth } from '$lib/utils';
   import { type ApiKeyResponseDto, type SessionResponseDto } from '@immich/sdk';
@@ -40,10 +28,16 @@
   import AppSettings from './app-settings.svelte';
   import ChangePasswordSettings from './change-password-settings.svelte';
   import DeviceList from './device-list.svelte';
+  import DownloadSettings from './download-settings.svelte';
+  import FeatureSettings from './feature-settings.svelte';
+  import NotificationsSettings from './notifications-settings.svelte';
   import OAuthSettings from './oauth-settings.svelte';
   import PartnerSettings from './partner-settings.svelte';
+  import ChangePinCodeSettings from './PinCodeSettings.svelte';
   import UserApiKeyList from './user-api-key-list.svelte';
   import UserProfileSettings from './user-profile-settings.svelte';
+  import UserPurchaseSettings from './user-purchase-settings.svelte';
+  import UserUsageStatistic from './user-usage-statistic.svelte';
 
   interface Props {
     keys?: ApiKeyResponseDto[];
@@ -156,7 +150,7 @@
     title={$t('user_groups')}
     subtitle={$t('manage_user_groups')}
   >
-    <GroupSettings user={$user} />
+    <GroupSettings user={authManager.user} />
   </SettingAccordion>
 
   <SettingAccordion
