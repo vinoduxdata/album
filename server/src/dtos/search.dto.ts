@@ -90,7 +90,7 @@ const SmartSearchSchema = BaseSearchWithResultsSchema.extend({
   language: z.string().optional().describe('Search language code'),
   order: AssetOrderSchema.optional().describe('Sort order (omit for relevance)'),
   page: z.number().min(1).optional().describe('Page number'),
-  withSharedSpaces: stringToBool.optional().describe('Include shared spaces the user is a member of'),
+  withSharedSpaces: z.boolean().optional().describe('Include shared spaces the user is a member of'),
 }).meta({ id: 'SmartSearchDto' });
 
 const SearchPlacesSchema = z
@@ -101,7 +101,7 @@ const SearchPlacesSchema = z
 
 const SearchPeopleSchema = z
   .object({
-    name: z.string().describe('Person name to search for'),
+    name: z.string().min(1).describe('Person name to search for'),
     withHidden: stringToBool.optional().describe('Include hidden people'),
   })
   .meta({ id: 'SearchPeopleDto' });
