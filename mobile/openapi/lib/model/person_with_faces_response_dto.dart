@@ -39,7 +39,6 @@ class PersonWithFacesResponseDto {
   ///
   String? color;
 
-  /// Face detections
   List<AssetFaceWithoutPersonResponseDto> faces;
 
   /// Person ID
@@ -181,7 +180,7 @@ class PersonWithFacesResponseDto {
         spacePersonId: mapValueOfType<String>(json, r'spacePersonId'),
         species: mapValueOfType<String>(json, r'species'),
         thumbnailPath: mapValueOfType<String>(json, r'thumbnailPath')!,
-        type: mapValueOfType<String>(json, r'type')!,
+        type: mapValueOfType<String>(json, r'type') ?? 'person',
         updatedAt: mapDateTime(json, r'updatedAt', r''),
       );
     }
@@ -236,7 +235,6 @@ class PersonWithFacesResponseDto {
     'isHidden',
     'name',
     'thumbnailPath',
-    'type',
   };
 }
 

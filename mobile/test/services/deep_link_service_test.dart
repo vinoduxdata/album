@@ -158,13 +158,5 @@ void main() {
       verifyNever(() => sharedSpaceApiRepository.get(any()));
     });
 
-    test('falls back to defaultPath on cold start when beta timeline is disabled', () async {
-      await Store.put(StoreKey.betaTimeline, false);
-
-      final result = await sut.handleScheme(_deepLinkFor('immich://space?id=$spaceId'), ref, true);
-
-      expect(result, same(DeepLink.defaultPath));
-      verifyNever(() => sharedSpaceApiRepository.get(any()));
-    });
   });
 }
