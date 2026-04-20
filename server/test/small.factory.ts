@@ -162,6 +162,7 @@ const sessionFactory = (session: Partial<Session> = {}) => ({
   userId: newUuid(),
   pinExpiresAt: newDate(),
   isPendingSyncReset: false,
+  oauthSid: null,
   appVersion: session.appVersion ?? null,
   ...session,
 });
