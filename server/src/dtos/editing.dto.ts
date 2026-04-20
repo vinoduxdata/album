@@ -1,13 +1,5 @@
-import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { ArrayMinSize, IsEnum, IsInt, IsNumber, Min, ValidateNested } from 'class-validator';
-import {
-  IsAxisAlignedRotation,
-  IsGreaterThanProperty,
-  IsUniqueEditActions,
-  ValidateEnum,
-  ValidateUUID,
-} from 'src/validation';
+import { createZodDto } from 'nestjs-zod';
+import z from 'zod';
 
 export enum AssetEditAction {
   Crop = 'crop',
@@ -28,76 +20,12 @@ export enum MirrorAxis {
 
 const MirrorAxisSchema = z.enum(['horizontal', 'vertical']).describe('Axis to mirror along').meta({ id: 'MirrorAxis' });
 
-  @IsInt()
-  @Min(0)
-  @ApiProperty({ description: 'Top-Left Y coordinate of crop' })
-  y!: number;
-
-  @IsInt()
-  @Min(1)
-  @ApiProperty({ description: 'Width of the crop' })
-  width!: number;
-
-  @IsInt()
-  @Min(1)
-  @ApiProperty({ description: 'Height of the crop' })
-  height!: number;
-}
-
-export class RotateParameters {
-  @IsAxisAlignedRotation()
-  @ApiProperty({ description: 'Rotation angle in degrees' })
-  angle!: number;
-}
-
-export class MirrorParameters {
-  @IsEnum(MirrorAxis)
-  @ApiProperty({ enum: MirrorAxis, enumName: 'MirrorAxis', description: 'Axis to mirror along' })
-  axis!: MirrorAxis;
-}
-
-export class TrimParameters {
-  @IsNumber()
-  @Min(0)
-  @ApiProperty({ description: 'Start time in seconds' })
-  startTime!: number;
-
-  @IsNumber()
-  @Min(0)
-  @IsGreaterThanProperty('startTime')
-  @ApiProperty({ description: 'End time in seconds' })
-  endTime!: number;
-}
-
-export type AssetEditParameters = CropParameters | RotateParameters | MirrorParameters | TrimParameters;
-export type AssetEditActionItem =
-  | {
-      action: AssetEditAction.Crop;
-      parameters: CropParameters;
-    }
-  | {
-      action: AssetEditAction.Rotate;
-      parameters: RotateParameters;
-    }
-  | {
-      action: AssetEditAction.Mirror;
-      parameters: MirrorParameters;
-    }
-  | {
-      action: AssetEditAction.Trim;
-      parameters: TrimParameters;
-    };
-
-@ApiExtraModels(CropParameters, RotateParameters, MirrorParameters, TrimParameters)
-export class AssetEditActionItemDto {
-  @ValidateEnum({ name: 'AssetEditAction', enum: AssetEditAction, description: 'Type of edit action to perform' })
-  action!: AssetEditAction;
-
-  @ApiProperty({
-    description: 'List of edit actions to apply (crop, rotate, or mirror)',
-    anyOf: [CropParameters, RotateParameters, MirrorParameters, TrimParameters].map((type) => ({
-      $ref: getSchemaPath(type),
-    })),
+const CropParametersSchema = z
+  .object({
+    x: z.number().min(0).describe('Top-Left X coordinate of crop'),
+    y: z.number().min(0).describe('Top-Left Y coordinate of crop'),
+    width: z.number().min(1).describe('Width of the crop'),
+    height: z.number().min(1).describe('Height of the crop'),
   })
   .meta({ id: 'CropParameters' });
 
@@ -118,29 +46,45 @@ const MirrorParametersSchema = z
   })
   .meta({ id: 'MirrorParameters' });
 
+const TrimParametersSchema = z
+  .object({
+    startTime: z.number().min(0).describe('Start time in seconds'),
+    endTime: z.number().min(0).describe('End time in seconds'),
+  })
+  .refine((v) => v.endTime > v.startTime, {
+    error: 'endTime must be greater than startTime',
+    path: ['endTime'],
+  })
+  .meta({ id: 'TrimParameters' });
+
 // TODO: ideally we would use the discriminated union directly in the future not only for type support but also for validation and openapi generation
 const __AssetEditActionItemSchema = z.discriminatedUnion('action', [
   z.object({ action: AssetEditActionSchema.extract(['Crop']), parameters: CropParametersSchema }),
   z.object({ action: AssetEditActionSchema.extract(['Rotate']), parameters: RotateParametersSchema }),
   z.object({ action: AssetEditActionSchema.extract(['Mirror']), parameters: MirrorParametersSchema }),
+  z.object({ action: AssetEditActionSchema.extract(['Trim']), parameters: TrimParametersSchema }),
 ]);
 
 const AssetEditParametersSchema = z
-  .union([CropParametersSchema, RotateParametersSchema, MirrorParametersSchema], {
+  .union([CropParametersSchema, RotateParametersSchema, MirrorParametersSchema, TrimParametersSchema], {
     error: getExpectedKeysByActionMessage,
   })
-  .describe('List of edit actions to apply (crop, rotate, or mirror)');
+  .describe('List of edit actions to apply (crop, rotate, mirror, or trim)');
 
 const actionParameterMap = {
-  [AssetEditAction.Crop]: CropParameters,
-  [AssetEditAction.Rotate]: RotateParameters,
-  [AssetEditAction.Mirror]: MirrorParameters,
-  [AssetEditAction.Trim]: TrimParameters,
-};
+  [AssetEditAction.Crop]: CropParametersSchema,
+  [AssetEditAction.Rotate]: RotateParametersSchema,
+  [AssetEditAction.Mirror]: MirrorParametersSchema,
+  [AssetEditAction.Trim]: TrimParametersSchema,
+} as const;
 
 function getExpectedKeysByActionMessage(): string {
   const expectedByAction = Object.entries(actionParameterMap)
-    .map(([action, schema]) => `${action}: [${Object.keys(schema.shape).join(', ')}]`)
+    .map(([action, schema]) => {
+      // Unwrap .refine() wrappers to reach the underlying ZodObject for key inspection
+      const inner = 'shape' in schema ? schema : (schema as unknown as { _def: { schema: z.ZodObject } })._def.schema;
+      return `${action}: [${Object.keys((inner as z.ZodObject).shape).join(', ')}]`;
+    })
     .join('; ');
 
   return `Invalid parameters for action, expected keys by action: ${expectedByAction}`;
@@ -157,10 +101,12 @@ const AssetEditActionItemSchema = z
   })
   .superRefine((edit, ctx) => {
     if (!isParametersValidForAction(edit)) {
+      const schema = actionParameterMap[edit.action];
+      const inner = 'shape' in schema ? schema : (schema as unknown as { _def: { schema: z.ZodObject } })._def.schema;
       ctx.addIssue({
         code: 'custom',
         path: ['parameters'],
-        message: `Invalid parameters for action '${edit.action}', expecting keys: ${Object.keys(actionParameterMap[edit.action].shape).join(', ')}`,
+        message: `Invalid parameters for action '${edit.action}', expecting keys: ${Object.keys((inner as z.ZodObject).shape).join(', ')}`,
       });
     }
   })
@@ -186,7 +132,7 @@ const AssetEditsCreateSchema = z
     edits: z
       .array(AssetEditActionItemSchema)
       .min(1)
-      .describe('List of edit actions to apply (crop, rotate, or mirror)')
+      .describe('List of edit actions to apply (crop, rotate, mirror, or trim)')
       .refine(uniqueEditActions, { error: 'Duplicate edit actions are not allowed' }),
   })
   .meta({ id: 'AssetEditsCreateDto' });
@@ -206,3 +152,6 @@ export class AssetEditActionItemResponseDto extends createZodDto(AssetEditAction
 export class AssetEditsCreateDto extends createZodDto(AssetEditsCreateSchema) {}
 export class AssetEditsResponseDto extends createZodDto(AssetEditsResponseSchema) {}
 export type CropParameters = z.infer<typeof CropParametersSchema>;
+export type TrimParameters = z.infer<typeof TrimParametersSchema>;
+export type RotateParameters = z.infer<typeof RotateParametersSchema>;
+export type MirrorParameters = z.infer<typeof MirrorParametersSchema>;
