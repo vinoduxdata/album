@@ -1212,6 +1212,16 @@ class FolderRouteArgs {
   String toString() {
     return 'FolderRouteArgs{key: $key, folder: $folder}';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! FolderRouteArgs) return false;
+    return key == other.key && folder == other.folder;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ folder.hashCode;
 }
 
 /// generated route for
@@ -1394,6 +1404,9 @@ class MapLocationPickerRouteArgs {
     if (other is! MapLocationPickerRouteArgs) return false;
     return key == other.key && initialLatLng == other.initialLatLng;
   }
+
+  @override
+  int get hashCode => key.hashCode ^ initialLatLng.hashCode;
 }
 
 /// generated route for
@@ -1816,6 +1829,16 @@ class SpaceDetailRouteArgs {
   String toString() {
     return 'SpaceDetailRouteArgs{key: $key, spaceId: $spaceId}';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! SpaceDetailRouteArgs) return false;
+    return key == other.key && spaceId == other.spaceId;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ spaceId.hashCode;
 }
 
 /// generated route for
@@ -1869,6 +1892,24 @@ class SpaceMemberSelectionRouteArgs {
   String toString() {
     return 'SpaceMemberSelectionRouteArgs{key: $key, spaceId: $spaceId, existingMemberIds: $existingMemberIds}';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! SpaceMemberSelectionRouteArgs) return false;
+    return key == other.key &&
+        spaceId == other.spaceId &&
+        const ListEquality<String>().equals(
+          existingMemberIds,
+          other.existingMemberIds,
+        );
+  }
+
+  @override
+  int get hashCode =>
+      key.hashCode ^
+      spaceId.hashCode ^
+      const ListEquality<String>().hash(existingMemberIds);
 }
 
 /// generated route for
@@ -1906,6 +1947,16 @@ class SpaceMembersRouteArgs {
   String toString() {
     return 'SpaceMembersRouteArgs{key: $key, spaceId: $spaceId}';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! SpaceMembersRouteArgs) return false;
+    return key == other.key && spaceId == other.spaceId;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ spaceId.hashCode;
 }
 
 /// generated route for
