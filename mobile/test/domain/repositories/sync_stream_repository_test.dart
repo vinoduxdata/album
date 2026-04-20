@@ -245,9 +245,7 @@ void main() {
       await sut.updateSharedSpacesV1([makeSpace()]);
       await sut.updateSharedSpaceMembersV1([makeMember()]);
       await sut.updateAssetsV1([_createAsset(id: 'asset-1', checksum: 'c1', fileName: 'a.jpg')]);
-      await sut.updateSharedSpaceToAssetsV1([
-        SyncSharedSpaceToAssetV1(spaceId: 'space-1', assetId: 'asset-1'),
-      ]);
+      await sut.updateSharedSpaceToAssetsV1([SyncSharedSpaceToAssetV1(spaceId: 'space-1', assetId: 'asset-1')]);
 
       await sut.deleteSharedSpacesV1([SyncSharedSpaceDeleteV1(spaceId: 'space-1')]);
 
@@ -264,9 +262,10 @@ void main() {
       await sut.updateSharedSpacesV1([makeSpace()]);
       await sut.updateSharedSpaceMembersV1([makeMember()]);
 
-      final row = await (db.sharedSpaceMemberEntity.select()
-            ..where((t) => t.spaceId.equals('space-1') & t.userId.equals('user-1')))
-          .getSingle();
+      final row =
+          await (db.sharedSpaceMemberEntity.select()
+                ..where((t) => t.spaceId.equals('space-1') & t.userId.equals('user-1')))
+              .getSingle();
       expect(row.role, 'editor');
       expect(row.showInTimeline, true);
     });
@@ -277,9 +276,10 @@ void main() {
       await sut.updateSharedSpaceMembersV1([makeMember(role: 'editor')]);
       await sut.updateSharedSpaceMembersV1([makeMember(role: 'owner', showInTimeline: false)]);
 
-      final row = await (db.sharedSpaceMemberEntity.select()
-            ..where((t) => t.spaceId.equals('space-1') & t.userId.equals('user-1')))
-          .getSingle();
+      final row =
+          await (db.sharedSpaceMemberEntity.select()
+                ..where((t) => t.spaceId.equals('space-1') & t.userId.equals('user-1')))
+              .getSingle();
       expect(row.role, 'owner');
       expect(row.showInTimeline, false);
     });
@@ -289,9 +289,7 @@ void main() {
       await sut.updateSharedSpacesV1([makeSpace()]);
       await sut.updateSharedSpaceMembersV1([makeMember(userId: 'user-1'), makeMember(userId: 'user-2')]);
 
-      await sut.deleteSharedSpaceMembersV1([
-        SyncSharedSpaceMemberDeleteV1(spaceId: 'space-1', userId: 'user-1'),
-      ]);
+      await sut.deleteSharedSpaceMembersV1([SyncSharedSpaceMemberDeleteV1(spaceId: 'space-1', userId: 'user-1')]);
 
       final remaining = await db.sharedSpaceMemberEntity.select().get();
       expect(remaining, hasLength(1));
@@ -300,9 +298,7 @@ void main() {
 
     test('updateSharedSpaceAssetsV1 delegates to updateAssetsV1 (writes remote_asset)', () async {
       await sut.updateUsersV1([_createUser()]);
-      await sut.updateSharedSpaceAssetsV1([
-        _createAsset(id: 'asset-1', checksum: 'cccc', fileName: 'shared.jpg'),
-      ]);
+      await sut.updateSharedSpaceAssetsV1([_createAsset(id: 'asset-1', checksum: 'cccc', fileName: 'shared.jpg')]);
 
       final row = await (db.remoteAssetEntity.select()..where((t) => t.id.equals('asset-1'))).getSingle();
       expect(row.name, 'shared.jpg');
@@ -310,10 +306,10 @@ void main() {
 
     test('updateSharedSpaceAssetExifsV1 delegates to updateAssetsExifV1 (writes remote_exif)', () async {
       await sut.updateUsersV1([_createUser()]);
-      await sut.updateSharedSpaceAssetsV1([
-        _createAsset(id: 'asset-1', checksum: 'cccc', fileName: 'shared.jpg'),
+      await sut.updateSharedSpaceAssetsV1([_createAsset(id: 'asset-1', checksum: 'cccc', fileName: 'shared.jpg')]);
+      await sut.updateSharedSpaceAssetExifsV1([
+        _createExif(assetId: 'asset-1', width: 100, height: 200, orientation: '1'),
       ]);
-      await sut.updateSharedSpaceAssetExifsV1([_createExif(assetId: 'asset-1', width: 100, height: 200, orientation: '1')]);
 
       final row = await (db.remoteExifEntity.select()..where((t) => t.assetId.equals('asset-1'))).getSingle();
       expect(row.width, 100);
@@ -345,9 +341,7 @@ void main() {
         SyncSharedSpaceToAssetV1(spaceId: 'space-1', assetId: 'asset-2'),
       ]);
 
-      await sut.deleteSharedSpaceToAssetsV1([
-        SyncSharedSpaceToAssetDeleteV1(spaceId: 'space-1', assetId: 'asset-1'),
-      ]);
+      await sut.deleteSharedSpaceToAssetsV1([SyncSharedSpaceToAssetDeleteV1(spaceId: 'space-1', assetId: 'asset-1')]);
 
       final remaining = await db.sharedSpaceAssetEntity.select().get();
       expect(remaining, hasLength(1));
@@ -356,17 +350,14 @@ void main() {
   });
 
   group('SyncStreamRepository - Libraries', () {
-    SyncLibraryV1 makeLibrary({
-      String id = 'library-1',
-      String name = 'External Library',
-      String ownerId = 'user-1',
-    }) => SyncLibraryV1(
-      id: id,
-      name: name,
-      ownerId: ownerId,
-      createdAt: DateTime(2026, 4, 6),
-      updatedAt: DateTime(2026, 4, 6),
-    );
+    SyncLibraryV1 makeLibrary({String id = 'library-1', String name = 'External Library', String ownerId = 'user-1'}) =>
+        SyncLibraryV1(
+          id: id,
+          name: name,
+          ownerId: ownerId,
+          createdAt: DateTime(2026, 4, 6),
+          updatedAt: DateTime(2026, 4, 6),
+        );
 
     SyncAssetV1 makeLibraryAsset({
       required String id,
@@ -396,7 +387,9 @@ void main() {
     );
 
     Future<void> insertPartner({required String sharedById, required String sharedWithId}) async {
-      await db.into(db.partnerEntity).insert(
+      await db
+          .into(db.partnerEntity)
+          .insert(
             PartnerEntityCompanion.insert(
               sharedById: sharedById,
               sharedWithId: sharedWithId,
@@ -440,9 +433,7 @@ void main() {
       await sut.updateLibraryAssetsV1([
         makeLibraryAsset(id: 'asset-1', checksum: 'c1', ownerId: 'user-1', libraryId: 'library-1'),
       ]);
-      await sut.updateLibraryAssetExifsV1([
-        _createExif(assetId: 'asset-1', width: 640, height: 480, orientation: '1'),
-      ]);
+      await sut.updateLibraryAssetExifsV1([_createExif(assetId: 'asset-1', width: 640, height: 480, orientation: '1')]);
 
       final row = await (db.remoteExifEntity.select()..where((t) => t.assetId.equals('asset-1'))).getSingle();
       expect(row.width, 640);
@@ -596,9 +587,7 @@ void main() {
           _createUser(id: 'user-partner'),
           _createUser(id: 'user-foreign'),
         ]);
-        await sut.updateLibrariesV1([
-          makeLibrary(id: 'library-1', ownerId: 'user-foreign'),
-        ]);
+        await sut.updateLibrariesV1([makeLibrary(id: 'library-1', ownerId: 'user-foreign')]);
       });
 
       test('preserves an asset owned by the current user', () async {
@@ -606,10 +595,7 @@ void main() {
           makeLibraryAsset(id: 'mine', checksum: 'c1', ownerId: 'user-1', libraryId: 'library-1'),
         ]);
 
-        await sut.deleteLibrariesV1(
-          [SyncLibraryDeleteV1(libraryId: 'library-1')],
-          currentUserId: 'user-1',
-        );
+        await sut.deleteLibrariesV1([SyncLibraryDeleteV1(libraryId: 'library-1')], currentUserId: 'user-1');
 
         final rows = await db.remoteAssetEntity.select().get();
         expect(rows, hasLength(1));
@@ -622,10 +608,7 @@ void main() {
           makeLibraryAsset(id: 'partner-asset', checksum: 'c2', ownerId: 'user-partner', libraryId: 'library-1'),
         ]);
 
-        await sut.deleteLibrariesV1(
-          [SyncLibraryDeleteV1(libraryId: 'library-1')],
-          currentUserId: 'user-1',
-        );
+        await sut.deleteLibrariesV1([SyncLibraryDeleteV1(libraryId: 'library-1')], currentUserId: 'user-1');
 
         final rows = await db.remoteAssetEntity.select().get();
         expect(rows, hasLength(1));
@@ -650,21 +633,11 @@ void main() {
           ),
         ]);
         await sut.updateLibraryAssetsV1([
-          makeLibraryAsset(
-            id: 'direct-add',
-            checksum: 'c3',
-            ownerId: 'user-foreign',
-            libraryId: 'library-1',
-          ),
+          makeLibraryAsset(id: 'direct-add', checksum: 'c3', ownerId: 'user-foreign', libraryId: 'library-1'),
         ]);
-        await sut.updateSharedSpaceToAssetsV1([
-          SyncSharedSpaceToAssetV1(spaceId: 'space-1', assetId: 'direct-add'),
-        ]);
+        await sut.updateSharedSpaceToAssetsV1([SyncSharedSpaceToAssetV1(spaceId: 'space-1', assetId: 'direct-add')]);
 
-        await sut.deleteLibrariesV1(
-          [SyncLibraryDeleteV1(libraryId: 'library-1')],
-          currentUserId: 'user-1',
-        );
+        await sut.deleteLibrariesV1([SyncLibraryDeleteV1(libraryId: 'library-1')], currentUserId: 'user-1');
 
         final rows = await db.remoteAssetEntity.select().get();
         expect(rows, hasLength(1));
@@ -676,10 +649,7 @@ void main() {
           makeLibraryAsset(id: 'orphan', checksum: 'c4', ownerId: 'user-foreign', libraryId: 'library-1'),
         ]);
 
-        await sut.deleteLibrariesV1(
-          [SyncLibraryDeleteV1(libraryId: 'library-1')],
-          currentUserId: 'user-1',
-        );
+        await sut.deleteLibrariesV1([SyncLibraryDeleteV1(libraryId: 'library-1')], currentUserId: 'user-1');
 
         final rows = await db.remoteAssetEntity.select().get();
         expect(rows, isEmpty);
@@ -694,10 +664,7 @@ void main() {
           makeLibraryAsset(id: 'orphan', checksum: 'c6', ownerId: 'user-foreign', libraryId: 'library-1'),
         ]);
 
-        await sut.deleteLibrariesV1(
-          [SyncLibraryDeleteV1(libraryId: 'library-1')],
-          currentUserId: 'user-1',
-        );
+        await sut.deleteLibrariesV1([SyncLibraryDeleteV1(libraryId: 'library-1')], currentUserId: 'user-1');
 
         // Library removed, orphan removed, user-owned preserved.
         expect(await db.libraryEntity.select().get(), isEmpty);
@@ -753,9 +720,7 @@ void main() {
         const int batchSize = 600;
         final libraryIds = List.generate(batchSize, (i) => 'lib-$i');
 
-        await sut.updateLibrariesV1(
-          libraryIds.map((id) => makeLibrary(id: id, ownerId: 'user-foreign')),
-        );
+        await sut.updateLibrariesV1(libraryIds.map((id) => makeLibrary(id: id, ownerId: 'user-foreign')));
         // Insert 600 orphan assets, one per library.
         await sut.updateLibraryAssetsV1(
           List.generate(
@@ -772,13 +737,10 @@ void main() {
         expect(await db.libraryEntity.select().get(), hasLength(batchSize + 1));
         expect(await db.remoteAssetEntity.select().get(), hasLength(batchSize));
 
-        await sut.deleteLibrariesV1(
-          [
-            SyncLibraryDeleteV1(libraryId: 'library-1'),
-            ...libraryIds.map((id) => SyncLibraryDeleteV1(libraryId: id)),
-          ],
-          currentUserId: 'user-1',
-        );
+        await sut.deleteLibrariesV1([
+          SyncLibraryDeleteV1(libraryId: 'library-1'),
+          ...libraryIds.map((id) => SyncLibraryDeleteV1(libraryId: id)),
+        ], currentUserId: 'user-1');
 
         // All 601 library rows and all 600 orphan assets gone.
         expect(await db.libraryEntity.select().get(), isEmpty);
@@ -801,14 +763,11 @@ void main() {
           makeLibraryAsset(id: 'orphan-3', checksum: 'cO3', ownerId: 'user-foreign', libraryId: 'library-3'),
         ]);
 
-        await sut.deleteLibrariesV1(
-          [
-            SyncLibraryDeleteV1(libraryId: 'library-1'),
-            SyncLibraryDeleteV1(libraryId: 'library-2'),
-            SyncLibraryDeleteV1(libraryId: 'library-3'),
-          ],
-          currentUserId: 'user-1',
-        );
+        await sut.deleteLibrariesV1([
+          SyncLibraryDeleteV1(libraryId: 'library-1'),
+          SyncLibraryDeleteV1(libraryId: 'library-2'),
+          SyncLibraryDeleteV1(libraryId: 'library-3'),
+        ], currentUserId: 'user-1');
 
         // All 3 library rows removed in the same transaction.
         expect(await db.libraryEntity.select().get(), isEmpty);
@@ -822,10 +781,9 @@ void main() {
           makeLibraryAsset(id: 'mine', checksum: 'c7', ownerId: 'user-1', libraryId: 'library-1'),
         ]);
 
-        await sut.deleteLibrariesV1(
-          [SyncLibraryDeleteV1(libraryId: 'library-does-not-exist')],
-          currentUserId: 'user-1',
-        );
+        await sut.deleteLibrariesV1([
+          SyncLibraryDeleteV1(libraryId: 'library-does-not-exist'),
+        ], currentUserId: 'user-1');
 
         // library-1 is untouched because the delete targeted a different id.
         expect(await db.libraryEntity.select().get(), hasLength(1));
@@ -902,10 +860,7 @@ void main() {
       // expected to stream the owner user row BEFORE the library row.
       await sut.updateUsersV1([_createUser()]);
 
-      await expectLater(
-        sut.updateLibrariesV1([makeLibrary(ownerId: 'user-does-not-exist')]),
-        throwsA(anything),
-      );
+      await expectLater(sut.updateLibrariesV1([makeLibrary(ownerId: 'user-does-not-exist')]), throwsA(anything));
       // Library table untouched.
       expect(await db.libraryEntity.select().get(), isEmpty);
     });
@@ -922,9 +877,7 @@ void main() {
 
       Future<void> seedAndDelete(int count) async {
         final libraryIds = List.generate(count, (i) => 'boundary-lib-$i');
-        await sut.updateLibrariesV1(
-          libraryIds.map((id) => makeLibrary(id: id, ownerId: 'user-foreign')),
-        );
+        await sut.updateLibrariesV1(libraryIds.map((id) => makeLibrary(id: id, ownerId: 'user-foreign')));
         // Each library has exactly one foreign-owned orphan asset.
         await sut.updateLibraryAssetsV1(
           List.generate(
@@ -998,10 +951,7 @@ void main() {
       await sut.updateLibrariesV1([makeLibrary(id: 'empty-lib', ownerId: 'user-1')]);
       expect(await db.libraryEntity.select().get(), hasLength(1));
 
-      await sut.deleteLibrariesV1(
-        [SyncLibraryDeleteV1(libraryId: 'empty-lib')],
-        currentUserId: 'user-1',
-      );
+      await sut.deleteLibrariesV1([SyncLibraryDeleteV1(libraryId: 'empty-lib')], currentUserId: 'user-1');
 
       expect(await db.libraryEntity.select().get(), isEmpty);
       expect(await db.remoteAssetEntity.select().get(), isEmpty);

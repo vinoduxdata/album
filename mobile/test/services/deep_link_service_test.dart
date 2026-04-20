@@ -157,6 +157,5 @@ void main() {
       expect(result, same(DeepLink.none));
       verifyNever(() => sharedSpaceApiRepository.get(any()));
     });
-
   });
 }

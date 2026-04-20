@@ -121,10 +121,7 @@ export const AssetResponseSchema = SanitizedAssetResponseSchema.extend(
       .boolean()
       .describe('Is edited')
       .meta(new HistoryBuilder().added('v2.5.0').beta('v2.5.0').getExtensions()),
-    resolvedSpaceId: z
-      .string()
-      .optional()
-      .describe('Resolved space ID (when server auto-detects space context)'),
+    resolvedSpaceId: z.string().optional().describe('Resolved space ID (when server auto-detects space context)'),
   }).shape,
 ).meta({ id: 'AssetResponseDto' });
 

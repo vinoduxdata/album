@@ -77,13 +77,17 @@ void main() {
 
       // 1. Existing user row survives.
       final userCount = await migratedDb
-          .customSelect("SELECT COUNT(*) AS c FROM user_entity WHERE id = 'user-pre-upgrade'")
+          .customSelect(
+            "SELECT COUNT(*) AS c FROM user_entity WHERE id = 'user-pre-upgrade'",
+          )
           .getSingle();
       expect(userCount.data['c'], 1);
 
       // 2. Existing asset row survives.
       final assetCount = await migratedDb
-          .customSelect("SELECT COUNT(*) AS c FROM remote_asset_entity WHERE id = 'asset-pre-upgrade'")
+          .customSelect(
+            "SELECT COUNT(*) AS c FROM remote_asset_entity WHERE id = 'asset-pre-upgrade'",
+          )
           .getSingle();
       expect(assetCount.data['c'], 1);
 
@@ -99,12 +103,22 @@ void main() {
             "SELECT name FROM sqlite_master WHERE type = 'index' AND name = 'idx_remote_asset_library_created'",
           )
           .get();
-      expect(indexRows, hasLength(1), reason: 'idx_remote_asset_library_created must exist after upgrade');
+      expect(
+        indexRows,
+        hasLength(1),
+        reason: 'idx_remote_asset_library_created must exist after upgrade',
+      );
 
       // 5. PRAGMA foreign_key_check: no broken FKs anywhere.
       await migratedDb.customStatement('PRAGMA foreign_keys = ON');
-      final fkErrors = await migratedDb.customSelect('PRAGMA foreign_key_check').get();
-      expect(fkErrors, isEmpty, reason: 'foreign_key_check should be empty post-upgrade');
+      final fkErrors = await migratedDb
+          .customSelect('PRAGMA foreign_key_check')
+          .get();
+      expect(
+        fkErrors,
+        isEmpty,
+        reason: 'foreign_key_check should be empty post-upgrade',
+      );
 
       // 6. Sanity: the new tables are writable AND the hard FK on
       // library.ownerId enforces referential integrity.
@@ -130,50 +144,56 @@ void main() {
       await migratedDb.close();
     });
 
-    test('populated library_id on a v23 asset survives the upgrade unchanged', () async {
-      // remote_asset_entity.library_id has existed since v23 — the
-      // from23To24 step only adds the new TABLES and the composite index
-      // idx_remote_asset_library_created. Assert that an asset row with a
-      // non-null library_id from v23 still has that library_id after the
-      // upgrade, and that the new composite index doesn't break the row.
-      final schema = await verifier.schemaAt(23);
-      final oldDb = Drift(schema.newConnection());
-      await oldDb.customStatement('''
+    test(
+      'populated library_id on a v23 asset survives the upgrade unchanged',
+      () async {
+        // remote_asset_entity.library_id has existed since v23 — the
+        // from23To24 step only adds the new TABLES and the composite index
+        // idx_remote_asset_library_created. Assert that an asset row with a
+        // non-null library_id from v23 still has that library_id after the
+        // upgrade, and that the new composite index doesn't break the row.
+        final schema = await verifier.schemaAt(23);
+        final oldDb = Drift(schema.newConnection());
+        await oldDb.customStatement('''
         INSERT INTO user_entity (id, name, email, has_profile_image, profile_changed_at, avatar_color)
         VALUES ('u1', 'n', 'n@n.n', 0, '2026-04-01T00:00:00.000', 0)
       ''');
-      await oldDb.customStatement('''
+        await oldDb.customStatement('''
         INSERT INTO remote_asset_entity
         (id, checksum, name, owner_id, type, created_at, updated_at, visibility, library_id)
         VALUES ('lib-asset', 'chk-lib', 'lib.jpg', 'u1', 0,
                 '2026-04-01T00:00:00.000', '2026-04-01T00:00:00.000', 0, 'legacy-lib-id')
       ''');
-      await oldDb.close();
+        await oldDb.close();
 
-      final migratedDb = Drift(schema.newConnection());
-      await verifier.migrateAndValidate(migratedDb, 24);
+        final migratedDb = Drift(schema.newConnection());
+        await verifier.migrateAndValidate(migratedDb, 24);
 
-      final row = await migratedDb
-          .customSelect("SELECT library_id FROM remote_asset_entity WHERE id = 'lib-asset'")
-          .getSingle();
-      expect(row.data['library_id'], 'legacy-lib-id');
+        final row = await migratedDb
+            .customSelect(
+              "SELECT library_id FROM remote_asset_entity WHERE id = 'lib-asset'",
+            )
+            .getSingle();
+        expect(row.data['library_id'], 'legacy-lib-id');
 
-      // The composite index is usable — EXPLAIN QUERY PLAN returns a
-      // plan that mentions the index name on a library_id+created_at
-      // filtered lookup.
-      final plan = await migratedDb
-          .customSelect(
-            "EXPLAIN QUERY PLAN SELECT * FROM remote_asset_entity WHERE library_id = 'legacy-lib-id' ORDER BY created_at DESC",
-          )
-          .get();
-      final planText = plan.map((r) => r.data['detail'] ?? '').join(' | ');
-      expect(
-        planText,
-        contains('idx_remote_asset_library_created'),
-        reason: 'query planner should use the new composite index for (library_id, created_at DESC) lookups',
-      );
+        // The composite index is usable — EXPLAIN QUERY PLAN returns a
+        // plan that mentions the index name on a library_id+created_at
+        // filtered lookup.
+        final plan = await migratedDb
+            .customSelect(
+              "EXPLAIN QUERY PLAN SELECT * FROM remote_asset_entity WHERE library_id = 'legacy-lib-id' ORDER BY created_at DESC",
+            )
+            .get();
+        final planText = plan.map((r) => r.data['detail'] ?? '').join(' | ');
+        expect(
+          planText,
+          contains('idx_remote_asset_library_created'),
+          reason:
+              'query planner should use the new composite index for (library_id, created_at DESC) lookups',
+        );
 
-      await migratedDb.close();
-    });
+        await migratedDb.close();
+      },
+    );
   });
 }
