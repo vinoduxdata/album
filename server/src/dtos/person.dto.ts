@@ -26,12 +26,9 @@ const PersonCreateSchema = z
   })
   .meta({ id: 'PersonCreateDto' });
 
-export class PersonWithFacesResponseDto extends PersonResponseDto {
-  @ApiProperty({ description: 'Face detections' })
-  faces!: AssetFaceWithoutPersonResponseDto[];
-  @ApiPropertyOptional({ description: 'Space person ID (when viewed through a space)' })
-  spacePersonId?: string;
-}
+const PersonUpdateSchema = PersonCreateSchema.extend({
+  featureFaceAssetId: z.uuidv4().optional().describe('Asset ID used for feature face thumbnail'),
+}).meta({ id: 'PersonUpdateDto' });
 
 const PeopleUpdateItemSchema = PersonUpdateSchema.extend({
   id: z.string().describe('Person ID'),
@@ -114,6 +111,7 @@ class AssetFaceWithoutPersonResponseDto extends createZodDto(AssetFaceWithoutPer
 
 export const PersonWithFacesResponseSchema = PersonResponseSchema.extend({
   faces: z.array(AssetFaceWithoutPersonResponseSchema),
+  spacePersonId: z.string().optional().describe('Space person ID (when viewed through a space)'),
 }).meta({ id: 'PersonWithFacesResponseDto' });
 
 export class PersonWithFacesResponseDto extends createZodDto(PersonWithFacesResponseSchema) {}
