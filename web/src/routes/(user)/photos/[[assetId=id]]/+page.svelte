@@ -42,7 +42,6 @@
   import { TimelineManager } from '$lib/managers/timeline-manager/timeline-manager.svelte';
   import { Route } from '$lib/route';
   import { getAssetBulkActions } from '$lib/services/asset.service';
-  import { preferences } from '$lib/stores/user.store';
   import { createUrl, getAssetMediaUrl, memoryLaneTitle } from '$lib/utils';
   import {
     updateStackedAssetInTimeline,
@@ -295,7 +294,7 @@
           onEscape={handleEscape}
           withStacked
         >
-          {#if $preferences.memories.enabled && !hasActiveFilters}
+          {#if authManager.preferences.memories.enabled && !hasActiveFilters}
             <ImageCarousel {items} />
           {/if}
           {#snippet empty()}

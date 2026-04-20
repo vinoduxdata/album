@@ -9,13 +9,13 @@
   import { closePaletteOnNavigate } from '$lib/managers/close-palette-on-navigate';
   import { globalSearchManager, type SearchMode } from '$lib/managers/global-search-manager.svelte';
   import { copyToClipboard } from '$lib/utils';
-  import DownloadPanel from '$lib/components/asset-viewer/download-panel.svelte';
-  import ErrorLayout from '$lib/components/layouts/ErrorLayout.svelte';
+  import DownloadPanel from './download-panel.svelte';
+  import ErrorLayout from './ErrorLayout.svelte';
   import OnEvents from '$lib/components/OnEvents.svelte';
-  import NavigationLoadingBar from '$lib/components/shared-components/navigation-loading-bar.svelte';
+  import NavigationLoadingBar from './navigation-loading-bar.svelte';
   import OpenInAppBanner from '$lib/components/shared-components/open-in-app-banner.svelte';
-  import UploadPanel from '$lib/components/shared-components/upload-panel.svelte';
-  import VersionAnnouncement from '$lib/components/VersionAnnouncement.svelte';
+  import UploadPanel from './upload-panel.svelte';
+  import VersionAnnouncement from './VersionAnnouncement.svelte';
   import { eventManager } from '$lib/managers/event-manager.svelte';
   import { serverConfigManager } from '$lib/managers/server-config-manager.svelte';
   import ServerRestartingModal from '$lib/modals/ServerRestartingModal.svelte';

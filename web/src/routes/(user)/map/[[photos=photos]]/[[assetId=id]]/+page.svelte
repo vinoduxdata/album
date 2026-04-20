@@ -13,7 +13,7 @@
   import { handlePhotosRemoveFilter } from '$lib/utils/photos-filter-options';
   import UserPageLayout from '$lib/components/layouts/user-page-layout.svelte';
   import OnEvents from '$lib/components/OnEvents.svelte';
-  import MapTimelinePanel from '$lib/components/shared-components/map/MapTimelinePanel.svelte';
+  import MapTimelinePanel from './MapTimelinePanel.svelte';
   import type { SelectionBBox } from '$lib/components/shared-components/map/types';
   import { QueryParameter, timeToLoadTheMap } from '$lib/constants';
   import Portal from '$lib/elements/Portal.svelte';
