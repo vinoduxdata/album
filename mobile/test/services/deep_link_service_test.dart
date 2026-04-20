@@ -14,28 +14,13 @@ import 'package:immich_mobile/domain/services/timeline.service.dart';
 import 'package:immich_mobile/entities/store.entity.dart';
 import 'package:immich_mobile/infrastructure/repositories/db.repository.dart';
 import 'package:immich_mobile/infrastructure/repositories/store.repository.dart';
-import 'package:immich_mobile/providers/album/current_album.provider.dart';
-import 'package:immich_mobile/providers/asset_viewer/current_asset.provider.dart';
 import 'package:immich_mobile/repositories/shared_space_api.repository.dart';
 import 'package:immich_mobile/routing/router.dart';
-import 'package:immich_mobile/services/album.service.dart';
-import 'package:immich_mobile/services/asset.service.dart';
 import 'package:immich_mobile/services/deep_link.service.dart';
-import 'package:immich_mobile/services/memory.service.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../fixtures/shared_space.stub.dart';
 import '../fixtures/user.stub.dart';
-
-class _MockMemoryService extends Mock implements MemoryService {}
-
-class _MockAssetService extends Mock implements AssetService {}
-
-class _MockAlbumService extends Mock implements AlbumService {}
-
-class _MockCurrentAsset extends Mock implements CurrentAsset {}
-
-class _MockCurrentAlbum extends Mock implements CurrentAlbum {}
 
 class _MockTimelineFactory extends Mock implements TimelineFactory {}
 
@@ -92,11 +77,6 @@ void main() {
     ref = _MockWidgetRef();
 
     sut = DeepLinkService(
-      _MockMemoryService(),
-      _MockAssetService(),
-      _MockAlbumService(),
-      _MockCurrentAsset(),
-      _MockCurrentAlbum(),
       _MockTimelineFactory(),
       _MockBetaAssetService(),
       _MockRemoteAlbumService(),
