@@ -113,8 +113,7 @@
     return megapixel || undefined;
   };
 
-  const getAssetFolderHref = (asset: AssetResponseDto) =>
-    Route.folders({ path: getParentPath(asset.originalPath) });
+  const getAssetFolderHref = (asset: AssetResponseDto) => Route.folders({ path: getParentPath(asset.originalPath) });
 
   onDestroy(() => {
     assetViewerManager.closeEditFacesPanel();
