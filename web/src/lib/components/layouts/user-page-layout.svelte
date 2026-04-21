@@ -77,7 +77,7 @@
         <div class="flex gap-2 items-center">
           {@render leading?.()}
           {#if title}
-            <div class="outline-none pe-8" tabindex="-1" id={headerId}>{title}</div>
+            <div class="outline-none pe-8" tabindex="-1" id={headerId} data-testid="page-header">{title}</div>
           {/if}
           {#if description}
             <p class="text-sm text-gray-400 dark:text-gray-600">{description}</p>
