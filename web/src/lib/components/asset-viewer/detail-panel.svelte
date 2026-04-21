@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import DetailPanelDate from '$lib/components/asset-viewer/detail-panel-date.svelte';
   import DetailPanelDescription from '$lib/components/asset-viewer/detail-panel-description.svelte';
   import DetailPanelLocation from '$lib/components/asset-viewer/detail-panel-location.svelte';
   import DetailPanelRating from '$lib/components/asset-viewer/detail-panel-star-rating.svelte';
@@ -12,7 +13,9 @@
   import { boundingBoxesArray } from '$lib/stores/people.store';
   import { locale } from '$lib/stores/preferences.store';
   import { createUrl, getAssetMediaUrl, getPeopleThumbnailUrl } from '$lib/utils';
-  import { delay } from '$lib/utils/asset-utils';
+  import { delay, getDimensions } from '$lib/utils/asset-utils';
+  import { getParentPath } from '$lib/utils/tree-utils';
+  import { getByteUnitString } from '$lib/utils/byte-units';
   import { handleError } from '$lib/utils/handle-error';
   import {
     AssetMediaSize,
@@ -22,7 +25,18 @@
     type AssetResponseDto,
   } from '@immich/sdk';
   import { Icon, IconButton, Text } from '@immich/ui';
-  import { mdiCamera, mdiCameraIris, mdiClose, mdiEye, mdiEyeOff, mdiPencil, mdiPlus } from '@mdi/js';
+  import {
+    mdiCamera,
+    mdiCameraIris,
+    mdiClose,
+    mdiEye,
+    mdiEyeOff,
+    mdiImageOutline,
+    mdiInformationOutline,
+    mdiPencil,
+    mdiPlus,
+  } from '@mdi/js';
+  import { slide } from 'svelte/transition';
   import { DateTime } from 'luxon';
   import { onDestroy } from 'svelte';
   import { t } from 'svelte-i18n';
@@ -93,6 +107,14 @@
     asset = await getAssetInfo({ id: asset.id, spaceId: effectiveSpaceId });
     assetViewerManager.closeEditFacesPanel();
   };
+
+  const getMegapixel = (width: number, height: number): number | undefined => {
+    const megapixel = Math.round((height * width) / 1_000_000);
+    return megapixel || undefined;
+  };
+
+  const getAssetFolderHref = (asset: AssetResponseDto) =>
+    Route.folders({ path: getParentPath(asset.originalPath) });
 
   onDestroy(() => {
     assetViewerManager.closeEditFacesPanel();
@@ -247,74 +269,131 @@
             {/if}
           {/each}
         </div>
-
-        {#if asset.exifInfo?.make || asset.exifInfo?.model || asset.exifInfo?.exposureTime || asset.exifInfo?.iso}
-          <div class="flex gap-4 py-4">
-            <div><Icon icon={mdiCamera} size="24" /></div>
-
-            <div>
-              {#if asset.exifInfo?.make || asset.exifInfo?.model}
-                <p>
-                  <a
-                    href={Route.search({
-                      make: asset.exifInfo?.make ?? undefined,
-                      model: asset.exifInfo?.model ?? undefined,
-                    })}
-                    title="{$t('search_for')} {asset.exifInfo.make || ''} {asset.exifInfo.model || ''}"
-                    class="hover:text-primary"
-                  >
-                    {asset.exifInfo.make || ''}
-                    {asset.exifInfo.model || ''}
-                  </a>
-                </p>
-              {/if}
-
-              <div class="flex gap-2 text-sm">
-                {#if asset.exifInfo.exposureTime}
-                  <p>{`${asset.exifInfo.exposureTime} s`}</p>
-                {/if}
-
-                {#if asset.exifInfo.iso}
-                  <p>{`ISO ${asset.exifInfo.iso}`}</p>
-                {/if}
-              </div>
-            </div>
-          </div>
-        {/if}
-
-        {#if asset.exifInfo?.lensModel || asset.exifInfo?.fNumber || asset.exifInfo?.focalLength}
-          <div class="flex gap-4 py-4">
-            <div><Icon icon={mdiCameraIris} size="24" /></div>
-
-            <div>
-              {#if asset.exifInfo?.lensModel}
-                <p>
-                  <a
-                    href={Route.search({ lensModel: asset.exifInfo.lensModel })}
-                    title="{$t('search_for')} {asset.exifInfo.lensModel}"
-                    class="hover:text-primary line-clamp-1"
-                  >
-                    {asset.exifInfo.lensModel}
-                  </a>
-                </p>
-              {/if}
-
-              <div class="flex gap-2 text-sm">
-                {#if asset.exifInfo?.fNumber}
-                  <p>ƒ/{asset.exifInfo.fNumber.toLocaleString($locale)}</p>
-                {/if}
-
-                {#if asset.exifInfo.focalLength}
-                  <p>{`${asset.exifInfo.focalLength.toLocaleString($locale)} mm`}</p>
-                {/if}
-              </div>
-            </div>
-          </div>
-        {/if}
-
-        <DetailPanelLocation {isOwner} {asset} />
       </section>
     {/if}
+
+    <div class="px-4 py-4">
+      {#if asset.exifInfo}
+        <div class="flex h-10 w-full items-center justify-between text-sm">
+          <Text size="small" color="muted">{$t('details')}</Text>
+        </div>
+      {:else}
+        <Text size="small" color="muted">{$t('no_exif_info_available')}</Text>
+      {/if}
+
+      <DetailPanelDate {asset} />
+
+      <div class="flex gap-4 py-4">
+        <div><Icon icon={mdiImageOutline} size="24" /></div>
+
+        <div>
+          <p class="break-all flex place-items-center gap-2 whitespace-pre-wrap">
+            {asset.originalFileName}
+            {#if isOwner}
+              <IconButton
+                icon={mdiInformationOutline}
+                aria-label={$t('show_file_location')}
+                size="small"
+                shape="round"
+                color="secondary"
+                variant="ghost"
+                onclick={() => assetViewerManager.toggleAssetPath()}
+              />
+            {/if}
+          </p>
+          {#if assetViewerManager.isShowAssetPath}
+            <p class="text-xs opacity-50 break-all pb-2 hover:text-primary" transition:slide={{ duration: 250 }}>
+              <!-- eslint-disable-next-line svelte/no-navigation-without-resolve this is supposed to be treated as an absolute/external link -->
+              <a href={getAssetFolderHref(asset)} title={$t('go_to_folder')} class="whitespace-pre-wrap">
+                {asset.originalPath}
+              </a>
+            </p>
+          {/if}
+          {#if (asset.exifInfo?.exifImageHeight && asset.exifInfo?.exifImageWidth) || asset.exifInfo?.fileSizeInByte}
+            <div class="flex gap-2 text-sm">
+              {#if asset.exifInfo?.exifImageHeight && asset.exifInfo?.exifImageWidth}
+                {#if getMegapixel(asset.exifInfo.exifImageHeight, asset.exifInfo.exifImageWidth)}
+                  <p>
+                    {getMegapixel(asset.exifInfo.exifImageHeight, asset.exifInfo.exifImageWidth)} MP
+                  </p>
+                {/if}
+                {@const { width, height } = getDimensions(asset.exifInfo)}
+                <p>{width} x {height}</p>
+              {/if}
+              {#if asset.exifInfo?.fileSizeInByte}
+                <p>{getByteUnitString(asset.exifInfo.fileSizeInByte, $locale)}</p>
+              {/if}
+            </div>
+          {/if}
+        </div>
+      </div>
+
+      {#if asset.exifInfo?.make || asset.exifInfo?.model || asset.exifInfo?.exposureTime || asset.exifInfo?.iso}
+        <div class="flex gap-4 py-4">
+          <div><Icon icon={mdiCamera} size="24" /></div>
+
+          <div>
+            {#if asset.exifInfo?.make || asset.exifInfo?.model}
+              <p>
+                <a
+                  href={Route.search({
+                    make: asset.exifInfo?.make ?? undefined,
+                    model: asset.exifInfo?.model ?? undefined,
+                  })}
+                  title="{$t('search_for')} {asset.exifInfo.make || ''} {asset.exifInfo.model || ''}"
+                  class="hover:text-primary"
+                >
+                  {asset.exifInfo.make || ''}
+                  {asset.exifInfo.model || ''}
+                </a>
+              </p>
+            {/if}
+
+            <div class="flex gap-2 text-sm">
+              {#if asset.exifInfo.exposureTime}
+                <p>{`${asset.exifInfo.exposureTime} s`}</p>
+              {/if}
+
+              {#if asset.exifInfo.iso}
+                <p>{`ISO ${asset.exifInfo.iso}`}</p>
+              {/if}
+            </div>
+          </div>
+        </div>
+      {/if}
+
+      {#if asset.exifInfo?.lensModel || asset.exifInfo?.fNumber || asset.exifInfo?.focalLength}
+        <div class="flex gap-4 py-4">
+          <div><Icon icon={mdiCameraIris} size="24" /></div>
+
+          <div>
+            {#if asset.exifInfo?.lensModel}
+              <p>
+                <a
+                  href={Route.search({ lensModel: asset.exifInfo.lensModel })}
+                  title="{$t('search_for')} {asset.exifInfo.lensModel}"
+                  class="hover:text-primary line-clamp-1"
+                >
+                  {asset.exifInfo.lensModel}
+                </a>
+              </p>
+            {/if}
+
+            <div class="flex gap-2 text-sm">
+              {#if asset.exifInfo?.fNumber}
+                <p>ƒ/{asset.exifInfo.fNumber.toLocaleString($locale)}</p>
+              {/if}
+
+              {#if asset.exifInfo.focalLength}
+                <p>{`${asset.exifInfo.focalLength.toLocaleString($locale)} mm`}</p>
+              {/if}
+            </div>
+          </div>
+        </div>
+      {/if}
+
+      <DetailPanelLocation {isOwner} {asset} />
+    </div>
 
     {#if latlng && featureFlagsManager.value.map}
       <div class="h-90">
